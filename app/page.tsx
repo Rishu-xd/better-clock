@@ -10,11 +10,12 @@ export default function LandingPage() {
     <main className="min-h-screen bg-gray-300 text-gray-800 flex items-center justify-center px-6">
       <div className="w-full max-w-md text-center">
         {/* Logo */}
-        
+        <div className=" flex gap-2 justify-center align-middle">
+        <img  className  = " size-10"   src="/assets/icon.png"></img>
         <h1 className="text-4xl font-semibold tracking-tight">
           Better Clock
         </h1>
-
+        </div>
         <p className="mt-3 text-neutral-500 text-sm">
           Your time. Still running.
         </p>
