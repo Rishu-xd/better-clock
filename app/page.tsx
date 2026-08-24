@@ -10,7 +10,7 @@ import { useTimer } from "react-use-precision-timer";
 
 const DEFAULT_HOURS = 0;
 const DEFAULT_MINUTES = 0;
-const DEFAULT_SECONDS = 5;
+const DEFAULT_SECONDS = 0;
 
 // Reverse vaporize / assemble duration
 const ASSEMBLE_DURATION = 0.8;
