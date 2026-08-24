@@ -7,7 +7,7 @@ export default function LandingPage() {
   const router = useRouter();
 
   return (
-    <main className="min-h-screen bg-white text-black flex items-center justify-center px-6">
+    <main className="min-h-screen bg-gray-300 text-gray-800 flex items-center justify-center px-6">
       <div className="w-full max-w-md text-center">
         {/* Logo */}
         
@@ -23,14 +23,14 @@ export default function LandingPage() {
         <div className="mt-12 flex flex-col gap-3">
           <button
             onClick={() => router.push("/timer")}
-            className="w-full rounded-xl bg-black px-6 py-3.5 text-sm font-medium text-white transition hover:bg-neutral-800 active:scale-[0.98]"
+            className=" cursor-pointer w-full rounded-xl bg-gray-800 px-6 py-3.5 text-sm font-medium text-gray-300 transition hover:bg-neutral-800 active:scale-[0.98]"
           >
             Start Timer
           </button>
 
           <button
             onClick={() => router.push("/login")}
-            className="w-full rounded-xl border border-neutral-200 px-6 py-3.5 text-sm font-medium text-black transition hover:bg-neutral-50 active:scale-[0.98]"
+            className=" cursor-pointer w-full rounded-xl border border-gray-500 px-6 py-3.5 text-sm font-medium text-gray-800 transition hover:bg-neutral-50 active:scale-[0.98]"
           >
             Login
           </button>
