@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+
 import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
@@ -30,7 +31,7 @@ export default function LoginPage() {
       return;
     }
 
-    router.push("/");
+    router.push("/Dashboard");
     router.refresh();
   }
 
