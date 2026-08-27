@@ -1,8 +1,7 @@
-
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-
+import { createClient } from "@/lib/supabase/client";
 import TextMorph from "@/componets/page";
 import VaporizeTextCycle from "@/componets/veporizer";
 
@@ -261,6 +260,11 @@ export default function Home() {
    * --------------------------------------------------
    */
 
+  const [sessionName, setSessionName] = useState("");
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [sessionStartedAt, setSessionStartedAt] =
+    useState<string | null>(null);
+
   const [selectedHours, setSelectedHours] =
     useState(DEFAULT_HOURS);
 
@@ -278,8 +282,8 @@ export default function Home() {
 
   const [seconds, setSeconds] = useState(
     DEFAULT_HOURS * 3600 +
-      DEFAULT_MINUTES * 60 +
-      DEFAULT_SECONDS
+    DEFAULT_MINUTES * 60 +
+    DEFAULT_SECONDS
   );
 
   const [state, setState] =
@@ -389,20 +393,83 @@ export default function Home() {
    * --------------------------------------------------
    */
 
-  const setTimer = () => {
+  const setTimer = async () => {
     const total =
       selectedHours * 3600 +
       selectedMinutes * 60 +
       selectedSeconds;
 
-    // Don't start a zero-second timer.
+    // Don't start a zero-second timer
     if (total <= 0) return;
 
+    const supabase = createClient();
+
+    // Get logged-in user
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      console.error("No logged-in user");
+      return;
+    }
+
+    // Get number of sessions this user already has
+    const { count, error: countError } = await supabase
+      .from("sessions")
+      .select("*", {
+        count: "exact",
+        head: true,
+      });
+
+    if (countError) {
+      console.error(
+        "Could not count sessions:",
+        countError
+      );
+      return;
+    }
+
+    // Use custom name if provided.
+    // Otherwise generate Session (number)
+    const finalName =
+      sessionName.trim() !== ""
+        ? sessionName.trim()
+        : `Session (${(count ?? 0) + 1})`;
+
+    const startedAt = new Date().toISOString();
+
+    // Create database session
+    const { data, error } = await supabase
+      .from("sessions")
+      .insert({
+        user_id: user.id,
+        name: finalName,
+        duration: total,
+        started_at: startedAt,
+        completed_at: null,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error(
+        "Could not create session:",
+        error
+      );
+      return;
+    }
+
+    // Remember the database row
+    setSessionId(data.id);
+    setSessionStartedAt(startedAt);
+
+    // Start timer
     timer.stop();
 
     setSeconds(total);
 
-    // First assemble the timer from particles.
     setState("assembling");
   };
 
@@ -417,8 +484,8 @@ export default function Home() {
 
     setSeconds(
       selectedHours * 3600 +
-        selectedMinutes * 60 +
-        selectedSeconds
+      selectedMinutes * 60 +
+      selectedSeconds
     );
 
     setState("setup");
@@ -470,7 +537,7 @@ export default function Home() {
             />
           </div>
 
-        
+
 
           {/* Set button */}
 
