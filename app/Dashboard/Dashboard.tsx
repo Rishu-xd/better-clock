@@ -80,6 +80,7 @@ export default function Dashboard({
               hover:border-zinc-600
               hover:bg-zinc-900
               active:scale-95
+              cursor-pointer
             "
           >
             Create Task
@@ -125,6 +126,8 @@ export default function Dashboard({
                   opacity-70
                   transition
                   hover:opacity-100
+
+                  cursor-pointer
                 "
               >
                 Create your first task
