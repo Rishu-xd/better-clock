@@ -4,17 +4,13 @@ import { useCallback, useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import TextMorph from "@/componets/page";
 import VaporizeTextCycle from "@/componets/veporizer";
-
 import { useTimer } from "react-use-precision-timer";
 
 const DEFAULT_HOURS = 0;
-const DEFAULT_MINUTES = 0;
+const DEFAULT_MINUTES = 25;
 const DEFAULT_SECONDS = 0;
 
-// Reverse vaporize / assemble duration
 const ASSEMBLE_DURATION = 0.8;
-
-// Completion vaporize duration
 const VAPORIZE_DURATION = 0.9;
 
 type TimerState =
@@ -32,6 +28,13 @@ type TimePickerProps = {
   setSeconds: React.Dispatch<React.SetStateAction<number>>;
 };
 
+const formatTime = (value: number) =>
+  String(value).padStart(2, "0");
+
+/* --------------------------------------------------
+ * TIME PICKER
+ * -------------------------------------------------- */
+
 function TimePicker({
   hours,
   minutes,
@@ -40,9 +43,6 @@ function TimePicker({
   setMinutes,
   setSeconds,
 }: TimePickerProps) {
-  const format = (value: number) =>
-    String(value).padStart(2, "0");
-
   return (
     <div className="flex items-center justify-center">
       <TimeColumn
@@ -77,6 +77,10 @@ function TimePicker({
   );
 }
 
+/* --------------------------------------------------
+ * TIME COLUMN
+ * -------------------------------------------------- */
+
 function TimeColumn({
   value,
   max,
@@ -88,12 +92,10 @@ function TimeColumn({
   label: string;
   setValue: React.Dispatch<React.SetStateAction<number>>;
 }) {
-  const format = (value: number) =>
-    String(value).padStart(2, "0");
-
   const getWrappedValue = (value: number) => {
     if (value > max) return 0;
     if (value < 0) return max;
+
     return value;
   };
 
@@ -134,8 +136,6 @@ function TimeColumn({
         hover:bg-white/[0.035]
       "
     >
-      {/* Previous number */}
-
       <div
         className="
           pointer-events-none
@@ -151,15 +151,12 @@ function TimeColumn({
           group-hover:text-zinc-600
         "
       >
-        {format(previous)}
+        {formatTime(previous)}
       </div>
-
-      {/* Current number */}
 
       <div
         className="
           pointer-events-none
-          cursor-pointer
           z-10
           text-[92px]
           font-medium
@@ -173,10 +170,8 @@ function TimeColumn({
           group-hover:scale-[1.025]
         "
       >
-        {format(value)}
+        {formatTime(value)}
       </div>
-
-      {/* Next number */}
 
       <div
         className="
@@ -193,10 +188,8 @@ function TimeColumn({
           group-hover:text-zinc-600
         "
       >
-        {format(next)}
+        {formatTime(next)}
       </div>
-
-      {/* Subtle top/bottom fade */}
 
       <div
         className="
@@ -226,8 +219,6 @@ function TimeColumn({
         "
       />
 
-      {/* Label */}
-
       <div
         className="
           pointer-events-none
@@ -253,17 +244,24 @@ function TimeColumn({
   );
 }
 
-export default function Home() {
-  /*
-   * --------------------------------------------------
-   * TIME SETTING
-   * --------------------------------------------------
-   */
+/* --------------------------------------------------
+ * TIMER PAGE
+ * -------------------------------------------------- */
 
-  const [sessionName, setSessionName] = useState("");
-  const [sessionId, setSessionId] = useState<string | null>(null);
-  const [sessionStartedAt, setSessionStartedAt] =
+export default function TimerPage() {
+  /* --------------------------------------------------
+   * TASK
+   * -------------------------------------------------- */
+
+  const [sessionName, setSessionName] =
+    useState("session_12");
+
+  const [sessionId, setSessionId] =
     useState<string | null>(null);
+
+  /* --------------------------------------------------
+   * SELECTED TIME
+   * -------------------------------------------------- */
 
   const [selectedHours, setSelectedHours] =
     useState(DEFAULT_HOURS);
@@ -274,47 +272,67 @@ export default function Home() {
   const [selectedSeconds, setSelectedSeconds] =
     useState(DEFAULT_SECONDS);
 
-  /*
-   * --------------------------------------------------
-   * TIMER STATE
-   * --------------------------------------------------
-   */
+  /* --------------------------------------------------
+   * TIMER
+   * -------------------------------------------------- */
 
   const [seconds, setSeconds] = useState(
     DEFAULT_HOURS * 3600 +
-    DEFAULT_MINUTES * 60 +
-    DEFAULT_SECONDS
+      DEFAULT_MINUTES * 60 +
+      DEFAULT_SECONDS
   );
 
   const [state, setState] =
     useState<TimerState>("setup");
 
-  /*
-   * --------------------------------------------------
-   * TIMER
-   * --------------------------------------------------
-   */
+  /* --------------------------------------------------
+   * PRECISION TIMER
+   * -------------------------------------------------- */
 
   const timer = useTimer(
     { delay: 1000 },
     useCallback(() => {
-      setSeconds((prev) => {
-        if (prev <= 1) {
+      setSeconds((previousSeconds) => {
+        if (previousSeconds <= 1) {
           timer.stop();
+
+          /*
+           * Timer finished.
+           * Mark the database session as completed.
+           */
+          if (sessionId) {
+            const supabase = createClient();
+
+            supabase
+              .from("sessions")
+              .update({
+                completed_at:
+                  new Date().toISOString(),
+              })
+              .eq("id", sessionId)
+              .then(({ error }) => {
+                if (error) {
+                  console.error(
+                    "Could not complete session:",
+                    error
+                  );
+                }
+              });
+          }
+
           setState("vaporizing");
+
           return 0;
         }
 
-        return prev - 1;
+        return previousSeconds - 1;
       });
-    }, [])
+    }, [sessionId])
   );
 
-  /*
-   * --------------------------------------------------
-   * AFTER ASSEMBLY
-   * --------------------------------------------------
-   */
+  /* --------------------------------------------------
+   * ASSEMBLY → RUNNING
+   * -------------------------------------------------- */
 
   useEffect(() => {
     if (state !== "assembling") return;
@@ -327,27 +345,36 @@ export default function Home() {
     return () => clearTimeout(timeout);
   }, [state, timer]);
 
-  /*
-   * --------------------------------------------------
-   * AFTER FINAL VAPORIZATION
-   * --------------------------------------------------
-   */
+  /* --------------------------------------------------
+   * VAPORIZATION → SETUP
+   * -------------------------------------------------- */
 
   useEffect(() => {
     if (state !== "vaporizing") return;
 
     const timeout = setTimeout(() => {
       setState("setup");
+      setSessionId(null);
+
+      /*
+       * Generate a fresh task name
+       * for the next task.
+       */
+      setSessionName((currentName) => {
+        if (currentName.trim() === "") {
+          return "session_12";
+        }
+
+        return currentName;
+      });
     }, VAPORIZE_DURATION * 1000);
 
     return () => clearTimeout(timeout);
   }, [state]);
 
-  /*
-   * --------------------------------------------------
+  /* --------------------------------------------------
    * TIMER VALUES
-   * --------------------------------------------------
-   */
+   * -------------------------------------------------- */
 
   const hours = Math.floor(seconds / 3600);
 
@@ -357,23 +384,12 @@ export default function Home() {
 
   const secs = seconds % 60;
 
-  const format = (value: number) =>
-    String(value).padStart(2, "0");
-
-  /*
-   * --------------------------------------------------
-   * TIMER TEXT
-   * --------------------------------------------------
-   */
-
   const timerText =
-    `${format(hours)}:${format(minutes)}:${format(secs)}`;
+    `${formatTime(hours)}:${formatTime(minutes)}:${formatTime(secs)}`;
 
-  /*
-   * --------------------------------------------------
-   * TEXT MORPH SETTINGS
-   * --------------------------------------------------
-   */
+  /* --------------------------------------------------
+   * TEXT MORPH
+   * -------------------------------------------------- */
 
   const textStyle = {
     fontFamily: "Inter",
@@ -387,11 +403,9 @@ export default function Home() {
     ease: "easeOut",
   };
 
-  /*
-   * --------------------------------------------------
-   * SET TIMER
-   * --------------------------------------------------
-   */
+  /* --------------------------------------------------
+   * CREATE TASK / SET TIMER
+   * -------------------------------------------------- */
 
   const setTimer = async () => {
     const total =
@@ -399,73 +413,90 @@ export default function Home() {
       selectedMinutes * 60 +
       selectedSeconds;
 
-    // Don't start a zero-second timer
     if (total <= 0) return;
 
     const supabase = createClient();
 
-    // Get logged-in user
+    /* Get logged-in user */
+
     const {
       data: { user },
       error: userError,
     } = await supabase.auth.getUser();
 
     if (userError || !user) {
-      console.error("No logged-in user");
+      console.error(
+        "No logged-in user:",
+        userError
+      );
+
       return;
     }
 
-    // Get number of sessions this user already has
-    const { count, error: countError } = await supabase
-      .from("sessions")
-      .select("*", {
-        count: "exact",
-        head: true,
-      });
+    /* Count user's sessions */
+
+    const { count, error: countError } =
+      await supabase
+        .from("sessions")
+        .select("*", {
+          count: "exact",
+          head: true,
+        })
+        .eq("user_id", user.id);
 
     if (countError) {
       console.error(
         "Could not count sessions:",
         countError
       );
+
       return;
     }
 
-    // Use custom name if provided.
-    // Otherwise generate Session (number)
+    /*
+     * Use the user's name.
+     *
+     * If they delete it completely,
+     * automatically generate session_N.
+     */
     const finalName =
       sessionName.trim() !== ""
         ? sessionName.trim()
-        : `Session (${(count ?? 0) + 1})`;
+        : `session_${(count ?? 0) + 1}`;
 
-    const startedAt = new Date().toISOString();
+    const startedAt =
+      new Date().toISOString();
 
-    // Create database session
-    const { data, error } = await supabase
-      .from("sessions")
-      .insert({
-        user_id: user.id,
-        name: finalName,
-        duration: total,
-        started_at: startedAt,
-        completed_at: null,
-      })
-      .select()
-      .single();
+    /* Create database session */
+
+    const { data, error } =
+      await supabase
+        .from("sessions")
+        .insert({
+          user_id: user.id,
+          name: finalName,
+          duration: total,
+          started_at: startedAt,
+          completed_at: null,
+        })
+        .select()
+        .single();
 
     if (error) {
       console.error(
         "Could not create session:",
         error
       );
+
       return;
     }
 
-    // Remember the database row
-    setSessionId(data.id);
-    setSessionStartedAt(startedAt);
+    /* Remember database session */
 
-    // Start timer
+    setSessionId(data.id);
+
+    /* Start timer */
+
     timer.stop();
 
     setSeconds(total);
@@ -473,29 +504,26 @@ export default function Home() {
     setState("assembling");
   };
 
-  /*
-   * --------------------------------------------------
+  /* --------------------------------------------------
    * RESET
-   * --------------------------------------------------
-   */
+   * -------------------------------------------------- */
 
   const resetTimer = () => {
     timer.stop();
 
-    setSeconds(
+    const total =
       selectedHours * 3600 +
       selectedMinutes * 60 +
-      selectedSeconds
-    );
+      selectedSeconds;
 
+    setSeconds(total);
+    setSessionId(null);
     setState("setup");
   };
 
-  /*
-   * --------------------------------------------------
-   * SETUP SCREEN
-   * --------------------------------------------------
-   */
+  /* --------------------------------------------------
+   * SETUP
+   * -------------------------------------------------- */
 
   if (state === "setup") {
     const canStart =
@@ -507,10 +535,38 @@ export default function Home() {
       <div className="flex min-h-screen items-center justify-center bg-black text-white">
         <main className="flex w-full flex-col items-center">
 
-          {/* Time picker */}
+          {/* TASK NAME */}
+
+          <input
+            value={sessionName}
+            onChange={(event) =>
+              setSessionName(event.target.value)
+            }
+            maxLength={100}
+            placeholder="Task name"
+            className="
+              mb-8
+              w-[420px]
+              rounded-full
+              border
+              border-zinc-800
+              bg-transparent
+              px-6
+              py-3
+              text-center
+              text-sm
+              text-white
+              outline-none
+              transition-all
+              duration-200
+              placeholder:text-zinc-600
+              focus:border-zinc-600
+            "
+          />
+
+          {/* TIME PICKER */}
 
           <div className="relative">
-
             <TimePicker
               hours={selectedHours}
               minutes={selectedMinutes}
@@ -519,8 +575,6 @@ export default function Home() {
               setMinutes={setSelectedMinutes}
               setSeconds={setSelectedSeconds}
             />
-
-            {/* Center selection line */}
 
             <div
               className="
@@ -537,9 +591,7 @@ export default function Home() {
             />
           </div>
 
-
-
-          {/* Set button */}
+          {/* SET TIMER */}
 
           <button
             onClick={setTimer}
@@ -570,11 +622,9 @@ export default function Home() {
     );
   }
 
-  /*
-   * --------------------------------------------------
-   * ASSEMBLE TIMER
-   * --------------------------------------------------
-   */
+  /* --------------------------------------------------
+   * ASSEMBLING
+   * -------------------------------------------------- */
 
   if (state === "assembling") {
     return (
@@ -621,11 +671,9 @@ export default function Home() {
     );
   }
 
-  /*
-   * --------------------------------------------------
-   * FINAL VAPORIZATION
-   * --------------------------------------------------
-   */
+  /* --------------------------------------------------
+   * VAPORIZING
+   * -------------------------------------------------- */
 
   if (state === "vaporizing") {
     return (
@@ -672,30 +720,36 @@ export default function Home() {
     );
   }
 
-  /*
-   * --------------------------------------------------
-   * NORMAL COUNTDOWN
-   * --------------------------------------------------
-   */
+  /* --------------------------------------------------
+   * RUNNING
+   * -------------------------------------------------- */
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-black">
       <main className="flex flex-col items-center">
 
-        <div className="flex items-center justify-center gap-5 text-white cursor-pointer" >
+        {/* TASK NAME */}
+
+        <div className="mb-6 text-sm text-zinc-500">
+          {sessionName}
+        </div>
+
+        {/* TIMER */}
+
+        <div className="flex cursor-pointer items-center justify-center gap-5 text-white">
 
           {/* HOURS */}
 
           <div className="flex">
             <TextMorph
-              words={format(hours)[0]}
+              words={formatTime(hours)[0]}
               color="#ffffff"
               font={textStyle}
               transition={transition}
             />
 
             <TextMorph
-              words={format(hours)[1]}
+              words={formatTime(hours)[1]}
               color="#ffffff"
               font={textStyle}
               transition={transition}
@@ -708,38 +762,38 @@ export default function Home() {
 
           {/* MINUTES */}
 
-          <div className="flex cursor-pointer">
+          <div className="flex">
             <TextMorph
-              words={format(minutes)[0]}
+              words={formatTime(minutes)[0]}
               color="#ffffff"
               font={textStyle}
               transition={transition}
             />
 
             <TextMorph
-              words={format(minutes)[1]}
+              words={formatTime(minutes)[1]}
               color="#ffffff"
               font={textStyle}
               transition={transition}
             />
           </div>
 
-          <span className="text-[100px] text-white ">
+          <span className="text-[100px] text-white">
             :
           </span>
 
           {/* SECONDS */}
 
-          <div className="flex cursor-pointer">
+          <div className="flex">
             <TextMorph
-              words={format(secs)[0]}
+              words={formatTime(secs)[0]}
               color="#ffffff"
               font={textStyle}
               transition={transition}
             />
 
             <TextMorph
-              words={format(secs)[1]}
+              words={formatTime(secs)[1]}
               color="#ffffff"
               font={textStyle}
               transition={transition}
