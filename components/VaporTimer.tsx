@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import VaporizeTextCycle from "@/componets/veporizer";
+import VaporizeTextCycle from "@/components/veporizer";
 
 interface VaporTimerProps {
   defaultMinutes?: number;

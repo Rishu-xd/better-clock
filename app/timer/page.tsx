@@ -3,8 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
-import TextMorph from "@/componets/page";
-import VaporizeTextCycle from "@/componets/veporizer";
+import TextMorph from "@/components/page";
+import VaporizeTextCycle from "@/components/veporizer";
 import { useTimer } from "react-use-precision-timer";
 
 const DEFAULT_HOURS = 0;
