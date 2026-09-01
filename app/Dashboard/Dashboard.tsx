@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 type Session = {
@@ -8,6 +9,7 @@ type Session = {
   duration: number;
   started_at: string | null;
   completed_at: string | null;
+  state: "in_progress" | "paused" | "completed";
 };
 
 type DashboardProps = {
@@ -35,6 +37,35 @@ function formatDuration(seconds: number) {
   return `${remainingSeconds}s`;
 }
 
+function formatCountdown(seconds: number) {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const remainingSeconds = seconds % 60;
+
+  return [hours, minutes, remainingSeconds]
+    .map((value) => String(value).padStart(2, "0"))
+    .join(":");
+}
+
+function getRemainingSeconds(
+  session: Session,
+  now: number | null
+) {
+  if (
+    session.state !== "in_progress" ||
+    !session.started_at ||
+    now === null
+  ) {
+    return session.duration;
+  }
+
+  const elapsedSeconds = Math.floor(
+    (now - new Date(session.started_at).getTime()) / 1000
+  );
+
+  return Math.max(session.duration - elapsedSeconds, 0);
+}
+
 function formatDate(date: string | null) {
   if (!date) return "In progress";
 
@@ -49,6 +80,22 @@ export default function Dashboard({
   sessions,
 }: DashboardProps) {
   const router = useRouter();
+  const [now, setNow] = useState<number | null>(null);
+
+  useEffect(() => {
+    const initialUpdate = window.setTimeout(() => {
+      setNow(Date.now());
+    }, 0);
+
+    const interval = window.setInterval(() => {
+      setNow(Date.now());
+    }, 1000);
+
+    return () => {
+      window.clearTimeout(initialUpdate);
+      window.clearInterval(interval);
+    };
+  }, []);
 
   return (
     <main className="min-h-screen bg-black px-6 py-10 text-white">
@@ -135,8 +182,14 @@ export default function Dashboard({
             </div>
           ) : (
             <div className="space-y-2">
-              {sessions.map((session) => (
-                <div
+              {sessions.map((session) => {
+                const remainingSeconds = getRemainingSeconds(
+                  session,
+                  now
+                );
+
+                return (
+                  <div
                   key={session.id}
                   className="
                     flex
@@ -151,7 +204,7 @@ export default function Dashboard({
                     hover:border-zinc-800
                     hover:bg-zinc-950
                   "
-                >
+                  >
                   {/* TASK */}
 
                   <div className="min-w-0">
@@ -169,27 +222,75 @@ export default function Dashboard({
 
                   {/* DURATION */}
 
-                  <div className="ml-6 text-right">
+                  <div className="ml-6 flex items-center gap-4">
+                    {(session.state === "in_progress" ||
+                      session.state === "paused") && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          router.push(
+                            `/timer?session=${session.id}`
+                          )
+                        }
+                        aria-label={`Continue ${
+                          session.name || "task"
+                        }`}
+                        className="
+                          flex
+                          h-9
+                          w-9
+                          cursor-pointer
+                          items-center
+                          justify-center
+                          rounded-full
+                          border
+                          border-zinc-700
+                          text-white
+                          transition
+                          hover:border-zinc-500
+                          hover:bg-zinc-800
+                          active:scale-95
+                        "
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          aria-hidden="true"
+                          className="h-4 w-4 fill-current"
+                        >
+                          <path d="M8 5v14l11-7z" />
+                        </svg>
+                      </button>
+                    )}
+
+                    <div className="text-right">
                     <p className="text-sm tabular-nums text-zinc-300">
-                      {formatDuration(
-                        session.duration
-                      )}
+                      {session.state === "completed"
+                        ? formatDuration(session.duration)
+                        : `${formatCountdown(
+                            remainingSeconds
+                          )} remaining`}
                     </p>
 
                     <p
                       className={`mt-1 text-xs ${
-                        session.completed_at
+                        session.state === "completed"
                           ? "text-zinc-600"
-                          : "text-zinc-400"
+                          : session.state === "paused"
+                            ? "text-amber-400"
+                            : "text-zinc-400"
                       }`}
                     >
-                      {session.completed_at
-                        ? "Completed"
-                        : "In progress"}
+                      {session.state === "paused"
+                        ? "Paused"
+                        : session.state === "completed"
+                          ? "Completed"
+                          : "In progress"}
                     </p>
+                    </div>
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </section>

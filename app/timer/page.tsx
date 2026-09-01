@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import TextMorph from "@/componets/page";
 import VaporizeTextCycle from "@/componets/veporizer";
@@ -17,7 +18,19 @@ type TimerState =
   | "setup"
   | "assembling"
   | "running"
+  | "paused"
   | "vaporizing";
+
+type SessionState =
+  | "in_progress"
+  | "paused"
+  | "completed";
+
+type SessionUpdateOptions = {
+  completedAt?: string;
+  duration?: number;
+  startedAt?: string;
+};
 
 type TimePickerProps = {
   hours: number;
@@ -30,6 +43,31 @@ type TimePickerProps = {
 
 const formatTime = (value: number) =>
   String(value).padStart(2, "0");
+
+function DashboardLink() {
+  return (
+    <Link
+      href="/Dashboard"
+      className="
+        absolute
+        right-6
+        top-6
+        rounded-full
+        border
+        border-zinc-800
+        px-4
+        py-2
+        text-xs
+        text-zinc-300
+        transition
+        hover:border-zinc-600
+        hover:bg-zinc-900
+      "
+    >
+      Open Dashboard
+    </Link>
+  );
+}
 
 /* --------------------------------------------------
  * TIME PICKER
@@ -285,6 +323,48 @@ export default function TimerPage() {
   const [state, setState] =
     useState<TimerState>("setup");
 
+  const updateSessionState = useCallback(
+    async (
+      nextState: SessionState,
+      options: SessionUpdateOptions = {}
+    ) => {
+      if (!sessionId) return;
+
+      const supabase = createClient();
+      const updates: {
+        state: SessionState;
+        completed_at?: string;
+        duration?: number;
+        started_at?: string;
+      } = { state: nextState };
+
+      if (options.completedAt) {
+        updates.completed_at = options.completedAt;
+      }
+
+      if (options.duration !== undefined) {
+        updates.duration = options.duration;
+      }
+
+      if (options.startedAt) {
+        updates.started_at = options.startedAt;
+      }
+
+      const { error } = await supabase
+        .from("sessions")
+        .update(updates)
+        .eq("id", sessionId);
+
+      if (error) {
+        console.error("Could not update session state:", error);
+      }
+    },
+    [sessionId]
+  );
+
+  const timerRef = useRef<ReturnType<typeof useTimer> | null>(null);
+  const loadedSessionRef = useRef(false);
+
   /* --------------------------------------------------
    * PRECISION TIMER
    * -------------------------------------------------- */
@@ -294,30 +374,17 @@ export default function TimerPage() {
     useCallback(() => {
       setSeconds((previousSeconds) => {
         if (previousSeconds <= 1) {
-          timer.stop();
+          timerRef.current?.stop();
 
           /*
            * Timer finished.
            * Mark the database session as completed.
            */
           if (sessionId) {
-            const supabase = createClient();
-
-            supabase
-              .from("sessions")
-              .update({
-                completed_at:
-                  new Date().toISOString(),
-              })
-              .eq("id", sessionId)
-              .then(({ error }) => {
-                if (error) {
-                  console.error(
-                    "Could not complete session:",
-                    error
-                  );
-                }
-              });
+            void updateSessionState(
+              "completed",
+              { completedAt: new Date().toISOString() }
+            );
           }
 
           setState("vaporizing");
@@ -327,8 +394,82 @@ export default function TimerPage() {
 
         return previousSeconds - 1;
       });
-    }, [sessionId])
+    }, [sessionId, updateSessionState])
   );
+
+  useEffect(() => {
+    timerRef.current = timer;
+  }, [timer]);
+
+  /* --------------------------------------------------
+   * LOAD EXISTING SESSION FROM THE DASHBOARD
+   * -------------------------------------------------- */
+
+  useEffect(() => {
+    if (loadedSessionRef.current) return;
+
+    const sessionFromUrl = new URLSearchParams(
+      window.location.search
+    ).get("session");
+
+    if (!sessionFromUrl) return;
+
+    loadedSessionRef.current = true;
+
+    const loadSession = async () => {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from("sessions")
+        .select("id, name, duration, started_at, state")
+        .eq("id", sessionFromUrl)
+        .single();
+
+      if (error || !data || data.state === "completed") {
+        console.error("Could not load session:", error);
+        return;
+      }
+
+      let remainingSeconds = data.duration;
+
+      if (data.state === "in_progress" && data.started_at) {
+        const elapsedSeconds = Math.floor(
+          (Date.now() - new Date(data.started_at).getTime()) /
+            1000
+        );
+
+        remainingSeconds = Math.max(
+          data.duration - elapsedSeconds,
+          0
+        );
+      }
+
+      setSessionId(data.id);
+      setSessionName(data.name || "Unnamed task");
+      setSeconds(remainingSeconds);
+
+      if (remainingSeconds === 0) {
+        await supabase
+          .from("sessions")
+          .update({
+            state: "completed",
+            completed_at: new Date().toISOString(),
+          })
+          .eq("id", data.id);
+        setState("vaporizing");
+        return;
+      }
+
+      if (data.state === "paused") {
+        setState("paused");
+        return;
+      }
+
+      setState("running");
+      timerRef.current?.start();
+    };
+
+    void loadSession();
+  }, []);
 
   /* --------------------------------------------------
    * ASSEMBLY → RUNNING
@@ -478,6 +619,7 @@ export default function TimerPage() {
           duration: total,
           started_at: startedAt,
           completed_at: null,
+          state: "in_progress",
         })
         .select()
         .single();
@@ -511,6 +653,13 @@ export default function TimerPage() {
   const resetTimer = () => {
     timer.stop();
 
+    if (sessionId) {
+      void updateSessionState(
+        "completed",
+        { completedAt: new Date().toISOString() }
+      );
+    }
+
     const total =
       selectedHours * 3600 +
       selectedMinutes * 60 +
@@ -519,6 +668,29 @@ export default function TimerPage() {
     setSeconds(total);
     setSessionId(null);
     setState("setup");
+  };
+
+  /* --------------------------------------------------
+   * PAUSE / RESUME
+   * -------------------------------------------------- */
+
+  const togglePause = () => {
+    if (state === "running") {
+      timer.stop();
+      setState("paused");
+      void updateSessionState("paused", {
+        duration: seconds,
+      });
+      return;
+    }
+
+    if (state === "paused") {
+      setState("running");
+      timer.start();
+      void updateSessionState("in_progress", {
+        startedAt: new Date().toISOString(),
+      });
+    }
   };
 
   /* --------------------------------------------------
@@ -532,7 +704,8 @@ export default function TimerPage() {
       selectedSeconds > 0;
 
     return (
-      <div className="flex min-h-screen items-center justify-center bg-black text-white">
+      <div className="relative flex min-h-screen items-center justify-center bg-black text-white">
+        <DashboardLink />
         <main className="flex w-full flex-col items-center">
 
           {/* TASK NAME */}
@@ -628,7 +801,8 @@ export default function TimerPage() {
 
   if (state === "assembling") {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-black">
+      <div className="relative flex min-h-screen items-center justify-center bg-black">
+        <DashboardLink />
         <div className="h-[140px] w-[700px]">
           <VaporizeTextCycle
             texts={[timerText]}
@@ -677,7 +851,8 @@ export default function TimerPage() {
 
   if (state === "vaporizing") {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-black">
+      <div className="relative flex min-h-screen items-center justify-center bg-black">
+        <DashboardLink />
         <div className="h-[140px] w-[700px]">
           <VaporizeTextCycle
             key="final-vaporize"
@@ -721,17 +896,18 @@ export default function TimerPage() {
   }
 
   /* --------------------------------------------------
-   * RUNNING
+   * RUNNING / PAUSED
    * -------------------------------------------------- */
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-black">
+    <div className="relative flex min-h-screen items-center justify-center bg-black">
+      <DashboardLink />
       <main className="flex flex-col items-center">
 
         {/* TASK NAME */}
 
         <div className="mb-6 text-sm text-zinc-500">
-          {sessionName}
+          {sessionName} {state === "paused" && "• Paused"}
         </div>
 
         {/* TIMER */}
@@ -801,25 +977,43 @@ export default function TimerPage() {
           </div>
         </div>
 
-        {/* RESET */}
+        {/* TIMER CONTROLS */}
 
-        <button
-          onClick={resetTimer}
-          className="
-            mt-8
-            cursor-pointer
-            rounded-full
-            border
-            border-zinc-700
-            px-6
-            py-3
-            text-white
-            transition
-            hover:bg-gray-900
-          "
-        >
-          Reset
-        </button>
+        <div className="mt-8 flex gap-3">
+          <button
+            onClick={togglePause}
+            className="
+              cursor-pointer
+              rounded-full
+              border
+              border-zinc-700
+              px-6
+              py-3
+              text-white
+              transition
+              hover:bg-gray-900
+            "
+          >
+            {state === "paused" ? "Resume" : "Pause"}
+          </button>
+
+          <button
+            onClick={resetTimer}
+            className="
+              cursor-pointer
+              rounded-full
+              border
+              border-zinc-700
+              px-6
+              py-3
+              text-white
+              transition
+              hover:bg-gray-900
+            "
+          >
+            Reset
+          </button>
+        </div>
       </main>
     </div>
   );
