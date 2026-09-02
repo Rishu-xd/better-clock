@@ -76,7 +76,7 @@ export default function Dashboard({ userEmail, sessions }: Props) {
             <Stat label="In progress" value={active} />
             <button onClick={() => router.push("/timer")} className="group flex cursor-pointer items-center justify-between rounded-2xl border border-black bg-black p-4 text-left transition hover:-translate-y-0.5 hover:bg-zinc-900"><span><span className="block text-xs text-zinc-400">Ready to focus?</span><span className="mt-1 block text-base font-medium">New task</span></span><span className="text-xl transition group-hover:translate-x-1">→</span></button>
             
-           <CalendarCard totalDots={30} filledDots={18} month={8} year={2026} /> 
+           <CalendarCard completedDays={25} title={"Monthly progress"} /> 
           </div>
           <section className="mt-6 rounded-[1.6rem] border border-white/35 bg-black/55 p-4 shadow-[0_18px_50px_rgba(23,38,39,.16)] backdrop-blur-xl sm:p-5">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3 px-1">
@@ -101,22 +101,7 @@ function Stat({ label, value }: { label: string; value: number }) {
   return <div className="rounded-2xl border border-white/30 bg-white/18 p-4 backdrop-blur-md"><p className="text-xs text-black/50">{label}</p><p className="mt-1 text-2xl font-medium tabular-nums text-black">{value}</p></div>;
 }
 
-// const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-// function CalendarCard({ totalDots, filledDots, month, year }: { totalDots: number; filledDots: number; month: number; year: number }) {
-//   const dots = Array.from({ length: totalDots }, (_, index) => index < filledDots);
-//   return (
-//     <div className="flex flex-col justify-between rounded-2xl border border-white/30 bg-white/18 p-4 backdrop-blur-md">
-//       <div className="flex items-baseline justify-between gap-2">
-//         <p className="truncate text-xs text-black/50">{monthNames[month] ?? ""} {year}</p>
-//         <p className="shrink-0 text-xs font-medium tabular-nums text-black/70">{filledDots}/{totalDots}</p>
-//       </div>
-//       <div className="mt-3 grid grid-cols-6 gap-1.5">
-//         {dots.map((filled, index) => <span key={index} className={`h-2.5 w-2.5 rounded-full transition ${filled ? "bg-black" : "bg-black/15"}`} />)}
-//       </div>
-//     </div>
-//   );
-// }
 
 function TaskCard({ session, seconds, onPlay }: { session: Session; seconds: number; onPlay: () => void }) {
   const active = session.state === "in_progress";

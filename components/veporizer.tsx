@@ -425,9 +425,7 @@ function __OriginkitBase_VaporizeTextCycle(props: VaporizeTextCycleProps = {}) {
     );
 }
 
-// ------------------------------------------------------------ //
-// SEO ELEMENT
-// ------------------------------------------------------------ //
+
 const SeoElement = memo(({ tag = "p", texts }: any) => {
     const style = useMemo<React.CSSProperties>(
         () => ({
@@ -445,9 +443,7 @@ const SeoElement = memo(({ tag = "p", texts }: any) => {
 });
 SeoElement.displayName = "SeoElement";
 
-// ------------------------------------------------------------ //
-// FONT HANDLING
-// ------------------------------------------------------------ //
+
 const handleFontChange = ({
     currentFont,
     lastFontRef,
@@ -479,9 +475,7 @@ const handleFontChange = ({
     return undefined;
 };
 
-// ------------------------------------------------------------ //
-// CLEANUP
-// ------------------------------------------------------------ //
+
 const cleanup = ({ canvasRef, particlesRef }: any) => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
@@ -493,9 +487,7 @@ const cleanup = ({ canvasRef, particlesRef }: any) => {
     }
 };
 
-// ------------------------------------------------------------ //
-// RESIZE OBSERVER
-// ------------------------------------------------------------ //
+
 const useResizeObserver = ({ wrapperRef, setWrapperSize }: any) => {
     useEffect(() => {
         const container = wrapperRef.current;
@@ -516,9 +508,7 @@ const useResizeObserver = ({ wrapperRef, setWrapperSize }: any) => {
     }, [wrapperRef, setWrapperSize]);
 };
 
-// ------------------------------------------------------------ //
-// WRAPPER SIZE
-// ------------------------------------------------------------ //
+
 const useWrapperSize = () => {
     const wrapperRef = useRef<HTMLDivElement | null>(null);
     const [wrapperSize, setWrapperSize] = useState<{
@@ -534,9 +524,7 @@ const useWrapperSize = () => {
     return { wrapperSize, setWrapperSize, wrapperRef };
 };
 
-// ------------------------------------------------------------ //
-// RENDER CANVAS
-// ------------------------------------------------------------ //
+
 const renderCanvas = ({
     framerProps,
     canvasRef,
@@ -604,9 +592,6 @@ const renderCanvas = ({
     canvas.textBoundaries = textBoundaries;
 };
 
-// ------------------------------------------------------------ //
-// PARTICLE SYSTEM
-// ------------------------------------------------------------ //
 const createParticles = (
     ctx: any,
     canvas: any,
