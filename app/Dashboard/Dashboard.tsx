@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import CalendarCard from "@/components/clender";
+import YourGrind from "@/components/yourstat";
 
 type State = "in_progress" | "paused" | "completed";
 type Filter = "all" | State;
@@ -65,18 +66,66 @@ export default function Dashboard({ userEmail, sessions }: Props) {
         <div className={`absolute right-5 top-20 z-30 w-64 origin-top-right rounded-2xl border border-white/40 bg-black/85 p-4 shadow-2xl backdrop-blur-xl transition duration-200 ease-out sm:right-8 lg:right-12 ${profileOpen ? "translate-y-0 scale-100 opacity-100" : "pointer-events-none -translate-y-2 scale-95 opacity-0"}`}>
           <p className="text-xs uppercase tracking-[.16em] text-zinc-500">Account</p>
           <p className="mt-2 truncate text-sm">{userEmail}</p>
-          <button type="button" className="mt-4 w-full cursor-pointer rounded-xl bg-white px-3 py-2 text-left text-xs font-medium text-black transition hover:bg-zinc-200">View public profile</button>
-          <button type="button" className="mt-2 w-full cursor-pointer rounded-xl border border-white/10 px-3 py-2 text-left text-xs text-zinc-300 transition hover:bg-white/10">Profile settings</button>
+          <button type="button"  onClick={() => router.push("/profile")} className="mt-4 w-full cursor-pointer rounded-xl bg-white px-3 py-2 text-left text-xs font-medium text-black transition hover:bg-zinc-200">View public profile</button>
+
           <button type="button" className="mt-2 w-full cursor-pointer rounded-xl border border-white/10 px-3 py-2 text-left text-xs text-zinc-300 transition hover:bg-white/10">Help center</button>
         </div>
         <div className="relative z-10 mx-auto flex w-full max-w-5xl flex-1 flex-col pt-16 sm:pt-20">
-          <div className="text-center"><p className="text-xs font-medium uppercase tracking-[.22em] text-black/45">Focus workspace</p><h1 className="mt-3 text-4xl font-medium tracking-[-.06em] text-black sm:text-5xl">Keep time on your side.</h1><p className="mx-auto mt-4 max-w-md text-sm leading-6 text-black/55">Start a focused session, pause when life interrupts, and return exactly where you left off.</p></div>
+          <div className="text-center"><h1 className="mt-3 text-xl font-extralight tracking-[-.06em] text-gray-800 sm:text-5xl">Focus workspace</h1></div>
           <div className="mt-9 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <Stat label="All tasks" value={sessions.length} />
-            <Stat label="In progress" value={active} />
-            <button onClick={() => router.push("/timer")} className="group flex cursor-pointer items-center justify-between rounded-2xl border border-black bg-black p-4 text-left transition hover:-translate-y-0.5 hover:bg-zinc-900"><span><span className="block text-xs text-zinc-400">Ready to focus?</span><span className="mt-1 block text-base font-medium">New task</span></span><span className="text-xl transition group-hover:translate-x-1">→</span></button>
-            
-           <CalendarCard completedDays={25} title={"Monthly progress"} /> 
+            {/* <Stat label="All tasks" value={sessions.length} />
+            <Stat label="In progress" value={active} /> */}
+            <div className="rounded-2xl border border-black/10 bg-black/[.08] p-3 backdrop-blur-md">
+              <p className="px-1 pb-2 text-[11px] font-medium uppercase tracking-[.16em] text-black/45">
+                Start a grind
+              </p>
+
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => router.push("/timer")}
+                  className="group cursor-pointer rounded-xl border border-black bg-black p-3 text-left text-white transition duration-300 hover:-translate-y-0.5 hover:bg-zinc-900 active:scale-[.98]"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Solo</span>
+                    <span className="text-lg transition-transform duration-300 group-hover:translate-x-0.5">
+                      →
+                    </span>
+                  </div>
+
+                  <p className="mt-1 text-[11px] text-zinc-400">
+                    Focus on your own
+                  </p>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => router.push("/grind")}
+                  className="group cursor-pointer rounded-xl border border-black/10 bg-white/30 p-3 text-left text-black transition duration-300 hover:-translate-y-0.5 hover:bg-white/50 active:scale-[.98]"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Group</span>
+                    <span className="text-lg transition-transform duration-300 group-hover:translate-x-0.5">
+                      →
+                    </span>
+                  </div>
+
+                  <p className="mt-1 text-[11px] text-black/45">
+                    Grind together
+                  </p>
+                </button>
+              </div>
+            </div>
+            <CalendarCard completedDays={25} title={"Monthly progress"} />
+
+
+          </div>
+          <div className="mt-6">
+            <YourGrind
+              totalSeconds={3600}
+              soloSeconds={360}
+              groupSeconds={0}
+            />
           </div>
           <section className="mt-6 rounded-[1.6rem] border border-white/35 bg-black/55 p-4 shadow-[0_18px_50px_rgba(23,38,39,.16)] backdrop-blur-xl sm:p-5">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3 px-1">

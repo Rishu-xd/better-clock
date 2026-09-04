@@ -43,7 +43,7 @@ export default function CalendarCard({
       : Math.round((completedCount / daysInMonth) * 100);
 
   return (
-    <section className="w-full max-w-sm h-30 rounded-2xl bg-white/18 backdrop-blur border p-3 overflow-hidden">
+    <section className="w-full max-w-sm  rounded-2xl bg-white/18 backdrop-blur border p-3 overflow-hidden">
 
       {/* Header */}
       <div className="flex items-center justify-between text-sm">

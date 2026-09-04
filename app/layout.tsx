@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Better clock",
+  title: "BetterClock",
   description: "Better Clock is a simple, modern, and distraction-free time management app designed to help you stay focused. Set a timer, watch the time transform smoothly, and keep track of your session with a clean interface built for focus.No clutter. No unnecessary features. Just a better way to manage your time.",
 };
 
