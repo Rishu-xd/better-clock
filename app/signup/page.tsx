@@ -53,14 +53,14 @@ export default function SignupPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gray-300 px-6">
+    <main className="min-h-screen flex items-center justify-center bg-[url('/assets/bg.png')] bg-cover bg-center  px-6">
       <div className="w-full max-w-sm">
 
         {/* Brand */}
         <div className="mb-10 text-center">
           <div className=" flex gap-2 justify-center align-middle">
         <img  className  = " size-10"   src="/assets/icon.png"></img>
-        <h1 className="text-4xl font-semibold tracking-tight text-gray-800">
+        <h1 className="text-4xl font-semibold tracking-tight text-gray-100">
           Better Clock
         </h1>
         </div>
@@ -71,7 +71,7 @@ export default function SignupPage() {
         </div>
 
         {/* Signup Form */}
-        <form onSubmit={handleSignup} className="space-y-4">
+        <form onSubmit={handleSignup} className="space-y-4 backdrop-blur border-1  rounded-xl p-6 shadow-lg bg-white/10  ">
 
           {/* Email */}
           <div>
@@ -89,7 +89,7 @@ export default function SignupPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full rounded-xl border placeholder:text-gray-400 border-gray-600 px-4 py-3 outline-none transition focus:border-black"
+              className="w-full rounded-xl border placeholder:text-gray-100 border-gray-400 px-4 py-3 outline-none transition focus:border-white"
             />
           </div>
 
@@ -109,7 +109,7 @@ export default function SignupPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full rounded-xl border placeholder:text-gray-400 border-gray-600 px-4 py-3 outline-none transition focus:border-black"
+              className="w-full rounded-xl border placeholder:text-gray-100 border-gray-400 px-4 py-3 outline-none transition focus:border-white"
             />
           </div>
 
@@ -129,7 +129,7 @@ export default function SignupPage() {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
-              className="w-full rounded-xl border    placeholder:text-gray-400 border-gray-600 px-4 py-3 outline-none transition focus:border-black"
+              className="w-full rounded-xl border    placeholder:text-gray-100 border-gray-400 px-4 py-3 outline-none transition focus:border-white"
             />
           </div>
 
@@ -151,7 +151,7 @@ export default function SignupPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-xl bg-black py-3 text-sm font-medium text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
+            className="w-full rounded-xl bg-white py-3 text-sm font-medium text-black transition hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loading ? "Creating account..." : "Create account"}
           </button>

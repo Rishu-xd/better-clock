@@ -36,26 +36,26 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gray-300 px-6">
+    <main className="min-h-screen flex items-center justify-center bg-[url('/assets/bg3.png')] bg-cover bg-center  px-6">
       <div className="w-full max-w-sm">
 
         {/* Logo / Brand */}
         <div className="mb-10 text-center">
            <div className=" flex gap-2 justify-center align-middle">
         <img  className  = " size-10"   src="/assets/icon.png"></img>
-        <h1 className="text-4xl font-semibold tracking-tight text-gray-800">
+        <h1 className="text-4xl font-semibold tracking-tight text-gray-300">
           Better Clock
         </h1>
         </div>
-          <p className="mt-2 text-sm text-gray-500">
+          <p className="mt-2 text-sm text-gray-800">
             Focus better. Track your time.
           </p>
         </div>
 
         {/* Login Form */}
-        <form onSubmit={handleLogin} className="space-y-4">
+        <form onSubmit={handleLogin} className="space-y-4 backdrop-blur-3xl border-0  rounded-3xl p-6 shadow-lg  border-t-1  ">
 
-          <div>
+          <div >
             <label
               htmlFor="email"
               className="mb-2 block text-sm font-medium text-gray-600"
@@ -70,7 +70,7 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full rounded-xl border  placeholder:text-gray-400 border-gray-500 px-4 py-3 outline-none transition focus:border-black"
+              className="w-full rounded-xl border  placeholder:text-gray-400 border-gray-500 px-4 py-3 outline-none transition focus:border-white focus:border-2"
             />
           </div>
 
@@ -89,7 +89,7 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full rounded-xl border border-gray-500 px-4 py-3 outline-none transition focus:border-black placeholder:text-gray-400"
+              className="w-full rounded-xl border border-gray-500 px-4 py-3 outline-none transition focus:border-white focus:border-2 placeholder:text-gray-400"
             />
           </div>
 
