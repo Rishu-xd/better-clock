@@ -51,3 +51,8 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .originkit/
+
+
+
+# Google OAuth credentials
+client_secret_*.json
