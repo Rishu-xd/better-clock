@@ -1,6 +1,7 @@
+
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/client";
@@ -13,6 +14,19 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // Controls when the full-resolution background becomes visible
+  const [backgroundLoaded, setBackgroundLoaded] = useState(false);
+
+  useEffect(() => {
+    const img = new Image();
+
+    img.src = "/assets/bg3.png";
+
+    img.onload = () => {
+      setBackgroundLoaded(true);
+    };
+  }, []);
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -36,26 +50,73 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-[url('/assets/bg3.png')] bg-cover bg-center  px-6">
-      <div className="w-full max-w-sm">
+    <main className="relative min-h-screen overflow-hidden flex items-center justify-center px-6">
+
+      {/* ─────────────────────────────────────
+          BACKGROUND
+      ───────────────────────────────────── */}
+
+      {/* Small/blurred image — appears immediately */}
+      <div
+        className="absolute inset-0 bg-cover bg-center scale-105 blur-sm"
+        style={{
+          backgroundImage: "url('/assets/bgs.jpg')",
+        }}
+      />
+
+      {/* Full 4K image — fades in after loading */}
+      <div
+        className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ${
+          backgroundLoaded ? "opacity-100" : "opacity-0"
+        }`}
+        style={{
+          backgroundImage: "url('/assets/bg.png')",
+        }}
+      />
+
+      {/* Optional dark/transparent overlay */}
+      <div className="absolute inset-0 bg-black/5" />
+
+
+      {/* ─────────────────────────────────────
+          LOGIN CONTENT
+      ───────────────────────────────────── */}
+
+      <div
+        className={`relative z-10 w-full max-w-sm transition-opacity duration-500 ${
+          loading ? "opacity-0" : "opacity-100"
+        }`}
+      >
 
         {/* Logo / Brand */}
         <div className="mb-10 text-center">
-           <div className=" flex gap-2 justify-center align-middle">
-        <img  className  = " size-10"   src="/assets/icon.png"></img>
-        <h1 className="text-4xl font-semibold tracking-tight text-gray-300">
-          Better Clock
-        </h1>
-        </div>
+          <div className="flex gap-2 justify-center items-center">
+
+            <img
+              className="size-10"
+              src="/assets/icon.png"
+              alt="Better Clock"
+            />
+
+            <h1 className="text-4xl font-semibold tracking-tight text-gray-300">
+              Better Clock
+            </h1>
+
+          </div>
+
           <p className="mt-2 text-sm text-gray-800">
             Focus better. Track your time.
           </p>
         </div>
 
-        {/* Login Form */}
-        <form onSubmit={handleLogin} className="space-y-4 backdrop-blur-3xl border-0  rounded-3xl p-6 shadow-lg  border-t-1  ">
 
-          <div >
+        {/* Login Form */}
+        <form
+          onSubmit={handleLogin}
+          className="space-y-4 backdrop-blur-sm rounded-3xl p-6 shadow-lg border border-gray-400 "
+        >
+
+          <div>
             <label
               htmlFor="email"
               className="mb-2 block text-sm font-medium text-gray-600"
@@ -70,9 +131,10 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full rounded-xl border  placeholder:text-gray-400 border-gray-500 px-4 py-3 outline-none transition focus:border-white focus:border-2"
+              className="w-full rounded-xl border border-gray-500 px-4 py-3 outline-none transition focus:border-white focus:border-2 placeholder:text-gray-400"
             />
           </div>
+
 
           <div>
             <label
@@ -93,11 +155,13 @@ export default function LoginPage() {
             />
           </div>
 
+
           {error && (
             <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
               {error}
             </p>
           )}
+
 
           <button
             type="submit"
@@ -106,11 +170,14 @@ export default function LoginPage() {
           >
             {loading ? "Logging in..." : "Login"}
           </button>
+
         </form>
+
 
         {/* Signup */}
         <p className="mt-6 text-center text-sm text-gray-500">
           Don't have an account?{" "}
+
           <button
             type="button"
             onClick={() => router.push("/signup")}
@@ -124,3 +191,4 @@ export default function LoginPage() {
     </main>
   );
 }
+
