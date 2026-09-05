@@ -31,6 +31,13 @@ function sessionDate(date: string | null) {
   return date ? new Date(date).toLocaleString([], { dateStyle: "medium", timeStyle: "short" }) : "Started recently";
 }
 
+function focusedSeconds(session: Session, now: number | null) {
+  if (session.state === "completed") return Math.max(0, session.duration);
+  if (session.state !== "in_progress" || !session.started_at || now === null) return 0;
+  const elapsed = Math.floor((now - new Date(session.started_at).getTime()) / 1000);
+  return Math.min(Math.max(0, elapsed), Math.max(0, session.duration));
+}
+
 export default function Dashboard({ userEmail, sessions }: Props) {
   const router = useRouter();
   const [now, setNow] = useState<number | null>(null);
@@ -68,6 +75,9 @@ export default function Dashboard({ userEmail, sessions }: Props) {
   const active = sessions.filter((item) => item.state === "in_progress").length;
   const paused = sessions.filter((item) => item.state === "paused").length;
   const completed = sessions.filter((item) => item.state === "completed").length;
+  const totalFocusedSeconds = sessions.reduce((total, session) => total + focusedSeconds(session, now), 0);
+  const localTime = now === null ? "--:--:--" : new Intl.DateTimeFormat(undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit" }).format(new Date(now));
+  const timezone = now === null ? "Local time" : Intl.DateTimeFormat().resolvedOptions().timeZone || "Local time";
   const initial = userEmail.trim().at(0)?.toUpperCase() || "U";
 
   return (
@@ -130,19 +140,22 @@ export default function Dashboard({ userEmail, sessions }: Props) {
                     Grind together
                   </p>
                 </button>
+
+                <button className="group cursor-pointer max-w-96 rounded-xl border border-[#171714]/10 bg-[#d8ff3f] p-3 text-left text-[#171714] transition duration-300 hover:-translate-y-0.5 hover:bg-[#c8ed30] active:scale-[.98] ">Friends</button>
               </div>
             </div>
-            <CalendarCard completedDays={25} title={"Monthly progress"} darkMode={darkMode} />
+            <CalendarCard sessions={sessions} now={now} title={"Monthly progress"} darkMode={darkMode} />
 
 
           </div>
           <div className="mt-6">
             <YourGrind
-              totalSeconds={3600}
-              soloSeconds={360}
+              totalSeconds={totalFocusedSeconds}
+              soloSeconds={totalFocusedSeconds}
               groupSeconds={0}
               theme={darkMode}
             />
+            <p className={`mt-3 text-center text-[11px] ${darkMode ? "text-white/40" : "text-[#171714]/45"}`}>Your local time: <span className="font-medium tabular-nums">{localTime}</span> · {timezone}</p>
           </div>
           <section className="mt-6 rounded-[1.6rem] border border-[#171714]/20 bg-[#20201c] p-4 shadow-[0_18px_50px_rgba(23,23,20,.2)] backdrop-blur-xl sm:p-5">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3 px-1">
