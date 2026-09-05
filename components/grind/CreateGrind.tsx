@@ -93,24 +93,24 @@ export default function CreateGrind({ onCreated }: CreateGrindProps) {
       }}
       className="relative w-full max-w-md"
     >
-      {/* Soft glow behind the glass */}
+      {/* Soft glow behind the glass
       <div
         className="
           pointer-events-none
           absolute -inset-8
           rounded-[2.5rem]
-          bg-orange-300/10
+          bg-[#d8ff3f]/20
           blur-3xl
         "
-      />
+      /> */}
 
       <div
         className="
           relative
           overflow-hidden
           rounded-3xl
-          border border-black/[0.07]
-          bg-white/55
+          border border-white/10
+          bg-[#20201c]/85
           p-6
           shadow-[0_20px_70px_rgba(0,0,0,0.08)]
           backdrop-blur-2xl
@@ -146,8 +146,7 @@ export default function CreateGrind({ onCreated }: CreateGrindProps) {
                 font-medium
                 uppercase
                 tracking-[0.18em]
-                text-black/40
-                dark:text-white/40
+                text-white/40
               "
             >
               Grind Together
@@ -161,8 +160,7 @@ export default function CreateGrind({ onCreated }: CreateGrindProps) {
                 text-2xl
                 font-semibold
                 tracking-tight
-                text-black/85
-                dark:text-white/90
+                text-[#f9f7f0]
               "
             >
               Create a grind
@@ -176,8 +174,7 @@ export default function CreateGrind({ onCreated }: CreateGrindProps) {
                 mt-1.5
                 text-sm
                 leading-relaxed
-                text-black/45
-                dark:text-white/45
+                text-white/45
               "
             >
               Start a room and bring people into the grind.
@@ -193,8 +190,7 @@ export default function CreateGrind({ onCreated }: CreateGrindProps) {
                 block
                 text-sm
                 font-medium
-                text-black/65
-                dark:text-white/65
+                text-white/65
               "
             >
               Grind name
@@ -225,18 +221,18 @@ export default function CreateGrind({ onCreated }: CreateGrindProps) {
                   w-full
                   rounded-2xl
                   border
-                  border-black/[0.08]
-                  bg-white/50
+                  border-white/10
+                  bg-white/[0.06]
                   px-4
                   text-sm
-                  text-black/80
+                  text-white/90
                   outline-none
                   transition-all
-                  placeholder:text-black/25
-                  focus:border-orange-400/40
-                  focus:bg-white/70
+                  placeholder:text-white/25
+                  focus:border-[#d8ff3f]/70
+                  focus:bg-white/[0.09]
                   focus:ring-4
-                  focus:ring-orange-400/10
+                  focus:ring-[#d8ff3f]/40
                   disabled:cursor-not-allowed
                   disabled:opacity-50
                   dark:border-white/[0.09]
@@ -257,8 +253,7 @@ export default function CreateGrind({ onCreated }: CreateGrindProps) {
                   right-3
                   text-[10px]
                   tabular-nums
-                  text-black/25
-                  dark:text-white/25
+                  text-white/25
                 "
               >
                 {name.length}/40
@@ -301,14 +296,14 @@ export default function CreateGrind({ onCreated }: CreateGrindProps) {
               justify-center
               overflow-hidden
               rounded-2xl
-              bg-black/[0.88]
+              bg-[#d8ff3f]
               text-sm
               font-medium
-              text-white
+              text-[#171714]
               shadow-lg
               shadow-black/10
               transition-opacity
-              hover:opacity-90
+              hover:bg-[#c8ed30]
               disabled:cursor-not-allowed
               disabled:opacity-50
               dark:bg-white/[0.90]

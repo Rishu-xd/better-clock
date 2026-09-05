@@ -77,7 +77,7 @@ const handleGitHubLogin = async () => {
   }
 
   return (
-    <main className="relative min-h-screen overflow-hidden flex items-center justify-center px-6">
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#f4f1ea] px-6 text-[#171714]">
 
       {/* ─────────────────────────────────────
           BACKGROUND
@@ -102,7 +102,9 @@ const handleGitHubLogin = async () => {
       />
 
       {/* Optional dark/transparent overlay */}
-      <div className="absolute inset-0 bg-black/5" />
+      <div className="absolute inset-0 bg-[#f4f1ea]/80 backdrop-blur-[2px]" />
+      <div className="grain pointer-events-none absolute inset-0 opacity-[0.06]" />
+      <div className="orb orb-one !right-[-12rem] !top-[-9rem] !opacity-60" />
 
 
       {/* ─────────────────────────────────────
@@ -125,13 +127,13 @@ const handleGitHubLogin = async () => {
               alt="Better Clock"
             />
 
-            <h1 className="text-4xl font-semibold tracking-tight text-gray-300">
+            <h1 className="text-4xl font-semibold tracking-tight text-[#171714]">
               Better Clock
             </h1>
 
           </div>
 
-          <p className="mt-2 text-sm text-gray-800">
+          <p className="mt-2 text-sm text-[#6b6960]">
             Focus better. Track your time.
           </p>
         </div>
@@ -140,13 +142,13 @@ const handleGitHubLogin = async () => {
         {/* Login Form */}
         <form
           onSubmit={handleLogin}
-          className="space-y-4 backdrop-blur-sm rounded-3xl p-6 shadow-lg border border-gray-400 "
+          className="space-y-4 rounded-3xl border border-[#171714]/10 bg-[#fbf9f3]/80 p-6 shadow-[0_20px_60px_rgba(23,23,20,.12)] backdrop-blur-sm"
         >
 
           <div>
             <label
               htmlFor="email"
-              className="mb-2 block text-sm font-medium text-gray-600"
+              className="mb-2 block text-sm font-medium text-[#4e4d46]"
             >
               Email
             </label>
@@ -158,7 +160,7 @@ const handleGitHubLogin = async () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full rounded-xl border border-gray-500 px-4 py-3 outline-none transition focus:border-white focus:border-2 placeholder:text-gray-400"
+              className="w-full rounded-xl border border-[#171714]/15 bg-white/70 px-4 py-3 outline-none transition focus:border-[#9dc700] focus:ring-4 focus:ring-[#d8ff3f]/40 placeholder:text-[#8a887d]"
             />
           </div>
 
@@ -166,7 +168,7 @@ const handleGitHubLogin = async () => {
           <div>
             <label
               htmlFor="password"
-              className="mb-2 block text-sm font-medium text-gray-600"
+              className="mb-2 block text-sm font-medium text-[#4e4d46]"
             >
               Password
             </label>
@@ -178,7 +180,7 @@ const handleGitHubLogin = async () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full rounded-xl border border-gray-500 px-4 py-3 outline-none transition focus:border-white focus:border-2 placeholder:text-gray-400"
+              className="w-full rounded-xl border border-[#171714]/15 bg-white/70 px-4 py-3 outline-none transition focus:border-[#9dc700] focus:ring-4 focus:ring-[#d8ff3f]/40 placeholder:text-[#8a887d]"
             />
           </div>
 
@@ -192,7 +194,7 @@ const handleGitHubLogin = async () => {
           <button
   type="button"
   onClick={handleGoogleLogin}
-  className="flex w-full items-center justify-center gap-3 rounded-xl border border-neutral-800 cursor-pointer bg-white px-4 py-3 text-sm font-medium text-black transition hover:bg-neutral-100"
+  className="flex w-full cursor-pointer items-center justify-center gap-3 rounded-xl border border-[#171714]/15 bg-white px-4 py-3 text-sm font-medium text-[#171714] transition hover:bg-[#f1eee5]"
 >
   <svg
     width="18"
@@ -226,7 +228,7 @@ const handleGitHubLogin = async () => {
 <button
   type="button"
   onClick={handleGitHubLogin}
-  className="flex w-full items-center justify-center gap-3 rounded-xl border border-neutral-800 bg-blue-950 cursor-pointer px-4 py-3 text-sm font-medium text-white transition hover:bg-gray-700"
+  className="flex w-full cursor-pointer items-center justify-center gap-3 rounded-xl border border-[#171714] bg-[#171714] px-4 py-3 text-sm font-medium text-[#f4f1ea] transition hover:bg-[#33332d]"
 >
   <svg width="20px" height="20px" viewBox="0 0 20 20" version="1.1" xmlns="http://www.w3.org/2000/svg" >
     
@@ -251,7 +253,7 @@ const handleGitHubLogin = async () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-xl cursor-pointer bg-gray-800 py-3 text-sm font-medium text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
+            className="w-full cursor-pointer rounded-xl bg-[#d8ff3f] py-3 text-sm font-semibold text-[#171714] transition hover:bg-[#c8ed30] disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loading ? "Logging in..." : "Login"}
           </button>
@@ -260,13 +262,13 @@ const handleGitHubLogin = async () => {
 
 
         {/* Signup */}
-        <p className="mt-6 text-center text-sm text-gray-500">
-          Don't have an account?{" "}
+        <p className="mt-6 text-center text-sm text-[#6b6960]">
+          Don&apos;t have an account?{" "}
 
           <button
             type="button"
             onClick={() => router.push("/signup")}
-            className="font-medium text-black hover:underline cursor-pointer"
+            className="cursor-pointer font-medium text-[#171714] hover:underline"
           >
             Sign up
           </button>

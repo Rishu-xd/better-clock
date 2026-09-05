@@ -68,7 +68,7 @@ export default function SignupPage() {
   }
 
   return (
-    <main className="relative min-h-screen overflow-hidden flex items-center justify-center px-6">
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#f4f1ea] px-6 text-[#171714]">
 
       {/* ─────────────────────────────
           BACKGROUND
@@ -93,7 +93,9 @@ export default function SignupPage() {
       />
 
       {/* Optional subtle overlay */}
-      <div className="absolute inset-0 bg-black/5" />
+      <div className="absolute inset-0 bg-[#f4f1ea]/80 backdrop-blur-[2px]" />
+      <div className="grain pointer-events-none absolute inset-0 opacity-[0.06]" />
+      <div className="orb orb-two !bottom-[-8rem] !left-[-8rem]" />
 
 
       {/* ─────────────────────────────
@@ -113,13 +115,13 @@ export default function SignupPage() {
               alt="Better Clock"
             />
 
-            <h1 className="text-4xl font-semibold tracking-tight text-gray-100">
+            <h1 className="text-4xl font-semibold tracking-tight text-[#171714]">
               Better Clock
             </h1>
 
           </div>
 
-          <p className="mt-2 text-sm text-gray-500">
+          <p className="mt-2 text-sm text-[#6b6960]">
             Create your account and start focusing.
           </p>
 
@@ -129,14 +131,14 @@ export default function SignupPage() {
         {/* Signup Form */}
         <form
           onSubmit={handleSignup}
-          className="space-y-4 backdrop-blur border border-gray-400 rounded-xl p-6 shadow-lg bg-white/10"
+          className="space-y-4 rounded-3xl border border-[#171714]/10 bg-[#fbf9f3]/80 p-6 shadow-[0_20px_60px_rgba(23,23,20,.12)] backdrop-blur"
         >
 
           {/* Email */}
           <div>
             <label
               htmlFor="email"
-              className="mb-2 block text-sm font-medium text-gray-500"
+              className="mb-2 block text-sm font-medium text-[#4e4d46]"
             >
               Email
             </label>
@@ -148,7 +150,7 @@ export default function SignupPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full rounded-xl border border-gray-400 px-4 py-3 outline-none transition focus:border-white placeholder:text-gray-100"
+              className="w-full rounded-xl border border-[#171714]/15 bg-white/70 px-4 py-3 outline-none transition focus:border-[#9dc700] focus:ring-4 focus:ring-[#d8ff3f]/40 placeholder:text-[#8a887d]"
             />
           </div>
 
@@ -157,7 +159,7 @@ export default function SignupPage() {
           <div>
             <label
               htmlFor="password"
-              className="mb-2 block text-sm font-medium text-gray-500"
+              className="mb-2 block text-sm font-medium text-[#4e4d46]"
             >
               Password
             </label>
@@ -169,7 +171,7 @@ export default function SignupPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full rounded-xl border border-gray-400 px-4 py-3 outline-none transition focus:border-white placeholder:text-gray-100"
+              className="w-full rounded-xl border border-[#171714]/15 bg-white/70 px-4 py-3 outline-none transition focus:border-[#9dc700] focus:ring-4 focus:ring-[#d8ff3f]/40 placeholder:text-[#8a887d]"
             />
           </div>
 
@@ -178,7 +180,7 @@ export default function SignupPage() {
           <div>
             <label
               htmlFor="confirmPassword"
-              className="mb-2 block text-sm font-medium text-gray-500"
+              className="mb-2 block text-sm font-medium text-[#4e4d46]"
             >
               Confirm password
             </label>
@@ -190,7 +192,7 @@ export default function SignupPage() {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
-              className="w-full rounded-xl border border-gray-400 px-4 py-3 outline-none transition focus:border-white placeholder:text-gray-100"
+              className="w-full rounded-xl border border-[#171714]/15 bg-white/70 px-4 py-3 outline-none transition focus:border-[#9dc700] focus:ring-4 focus:ring-[#d8ff3f]/40 placeholder:text-[#8a887d]"
             />
           </div>
 
@@ -215,7 +217,7 @@ export default function SignupPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-xl bg-white py-3 text-sm font-medium text-black transition hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50"
+            className="w-full rounded-xl bg-[#d8ff3f] py-3 text-sm font-semibold text-[#171714] transition hover:bg-[#c8ed30] disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loading ? "Creating account..." : "Create account"}
           </button>
@@ -224,14 +226,14 @@ export default function SignupPage() {
 
 
         {/* Login */}
-        <p className="mt-6 text-center text-sm text-gray-500">
+        <p className="mt-6 text-center text-sm text-[#6b6960]">
 
           Already have an account?{" "}
 
           <button
             type="button"
             onClick={() => router.push("/login")}
-            className="font-medium text-black hover:underline"
+            className="font-medium text-[#171714] hover:underline"
           >
             Login
           </button>

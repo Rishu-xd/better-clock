@@ -23,6 +23,7 @@ export default function YourGrind({
   const total = Math.max(totalSeconds, 0);
   const solo = Math.max(soloSeconds, 0);
   const group = Math.max(groupSeconds, 0);
+  const theme = "light"; // Replace with your theme logic if needed
 
   const soloPercentage =
     total > 0 ? Math.round((solo / total) * 100) : 0;

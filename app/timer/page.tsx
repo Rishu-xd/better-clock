@@ -54,14 +54,14 @@ function DashboardLink() {
         top-6
         rounded-full
         border
-        border-zinc-800
+        border-[#d8ff3f]/40
         px-4
         py-2
         text-xs
-        text-zinc-300
+        text-[#f4f1ea]
         transition
-        hover:border-zinc-600
-        hover:bg-zinc-900
+        hover:border-[#d8ff3f]
+        hover:bg-[#33332d]
       "
     >
       Open Dashboard
@@ -90,7 +90,7 @@ function TimePicker({
         setValue={setHours}
       />
 
-      <span className="mx-2 -mt-1 text-[90px] font-light leading-none text-zinc-500">
+      <span className="mx-2 -mt-1 text-[90px] font-light leading-none text-[#d8ff3f]/45">
         :
       </span>
 
@@ -101,7 +101,7 @@ function TimePicker({
         setValue={setMinutes}
       />
 
-      <span className="mx-2 -mt-1 text-[90px] font-light leading-none text-zinc-500">
+      <span className="mx-2 -mt-1 text-[90px] font-light leading-none text-[#d8ff3f]/45">
         :
       </span>
 
@@ -182,11 +182,11 @@ function TimeColumn({
           text-[32px]
           font-medium
           tabular-nums
-          text-zinc-700
+          text-[#d8ff3f]/25
           transition-all
           duration-300
           ease-out
-          group-hover:text-zinc-600
+          group-hover:text-[#d8ff3f]/50
         "
       >
         {formatTime(previous)}
@@ -201,7 +201,7 @@ function TimeColumn({
           leading-none
           tracking-[-0.06em]
           tabular-nums
-          text-white
+          text-[#f9f7f0]
           transition-transform
           duration-200
           ease-out
@@ -219,11 +219,11 @@ function TimeColumn({
           text-[32px]
           font-medium
           tabular-nums
-          text-zinc-700
+          text-[#d8ff3f]/25
           transition-all
           duration-300
           ease-out
-          group-hover:text-zinc-600
+          group-hover:text-[#d8ff3f]/50
         "
       >
         {formatTime(next)}
@@ -237,7 +237,7 @@ function TimeColumn({
           top-0
           h-10
           bg-gradient-to-b
-          from-black
+          from-[#20201c]
           to-transparent
           opacity-80
         "
@@ -251,7 +251,7 @@ function TimeColumn({
           bottom-0
           h-10
           bg-gradient-to-t
-          from-black
+          from-[#20201c]
           to-transparent
           opacity-80
         "
@@ -268,7 +268,7 @@ function TimeColumn({
           font-medium
           uppercase
           tracking-[0.2em]
-          text-zinc-600
+          text-[#d8ff3f]/40
           opacity-0
           transition-all
           duration-300
@@ -704,7 +704,7 @@ export default function TimerPage() {
       selectedSeconds > 0;
 
     return (
-      <div className="relative flex min-h-screen items-center justify-center bg-black text-white">
+      <div className="relative flex min-h-screen items-center justify-center bg-[#20201c] text-[#f9f7f0]">
         <DashboardLink />
         <main className="flex w-full flex-col items-center">
 
@@ -722,18 +722,18 @@ export default function TimerPage() {
               w-[420px]
               rounded-full
               border
-              border-zinc-800
+              border-[#f4f1ea]/15
               bg-transparent
               px-6
               py-3
               text-center
               text-sm
-              text-white
+              text-[#f9f7f0]
               outline-none
               transition-all
               duration-200
-              placeholder:text-zinc-600
-              focus:border-zinc-600
+              placeholder:text-[#f4f1ea]/35
+              focus:border-[#d8ff3f]
             "
           />
 
@@ -759,7 +759,7 @@ export default function TimerPage() {
                 w-[425px]
                 -translate-x-1/2
                 -translate-y-1/2
-                bg-white/[0.06]
+                bg-[#d8ff3f]/15
               "
             />
           </div>
@@ -774,15 +774,15 @@ export default function TimerPage() {
               cursor-pointer
               rounded-full
               border
-              border-zinc-800
+              border-[#d8ff3f]/40
               px-8
               py-3
               text-sm
-              text-white
+              text-[#f9f7f0]
               transition-all
               duration-200
-              hover:border-zinc-600
-              hover:bg-zinc-900
+              hover:border-[#d8ff3f]
+              hover:bg-[#33332d]
               active:scale-95
               disabled:cursor-not-allowed
               disabled:opacity-30
@@ -801,7 +801,7 @@ export default function TimerPage() {
 
   if (state === "assembling") {
     return (
-      <div className="relative flex min-h-screen items-center justify-center bg-black">
+      <div className="relative flex min-h-screen items-center justify-center bg-[#20201c]">
         <DashboardLink />
         <div className="h-[140px] w-[700px]">
           <VaporizeTextCycle
@@ -814,7 +814,7 @@ export default function TimerPage() {
               letterSpacing: 0,
               textAlign: "center",
             }}
-            color="rgb(255, 255, 255)"
+            color="rgb(216, 255, 63)"
             spread={1}
             density={5}
             alignment="center"
@@ -851,7 +851,7 @@ export default function TimerPage() {
 
   if (state === "vaporizing") {
     return (
-      <div className="relative flex min-h-screen items-center justify-center bg-black">
+      <div className="relative flex min-h-screen items-center justify-center bg-[#20201c]">
         <DashboardLink />
         <div className="h-[140px] w-[700px]">
           <VaporizeTextCycle
@@ -865,7 +865,7 @@ export default function TimerPage() {
               letterSpacing: 0,
               textAlign: "center",
             }}
-            color="rgb(255, 255, 255)"
+            color="rgb(216, 255, 63)"
             spread={1}
             density={5}
             alignment="center"
@@ -900,39 +900,39 @@ export default function TimerPage() {
    * -------------------------------------------------- */
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-black">
+    <div className="relative flex min-h-screen items-center justify-center bg-[#20201c]">
       <DashboardLink />
       <main className="flex flex-col items-center">
 
         {/* TASK NAME */}
 
-        <div className="mb-6 text-sm text-zinc-500">
+        <div className="mb-6 text-sm text-[#f4f1ea]/45">
           {sessionName} {state === "paused" && "• Paused"}
         </div>
 
         {/* TIMER */}
 
-        <div className="flex cursor-pointer items-center justify-center gap-5 text-white">
+        <div className="flex cursor-pointer items-center justify-center gap-5 text-[#f9f7f0]">
 
           {/* HOURS */}
 
           <div className="flex">
             <TextMorph
               words={formatTime(hours)[0]}
-              color="#ffffff"
+              color="#d8ff3f"
               font={textStyle}
               transition={transition}
             />
 
             <TextMorph
               words={formatTime(hours)[1]}
-              color="#ffffff"
+              color="#d8ff3f"
               font={textStyle}
               transition={transition}
             />
           </div>
 
-          <span className="text-[100px] text-white">
+          <span className="text-[100px] text-[#f9f7f0]">
             :
           </span>
 
@@ -941,20 +941,20 @@ export default function TimerPage() {
           <div className="flex">
             <TextMorph
               words={formatTime(minutes)[0]}
-              color="#ffffff"
+              color="#d8ff3f"
               font={textStyle}
               transition={transition}
             />
 
             <TextMorph
               words={formatTime(minutes)[1]}
-              color="#ffffff"
+              color="#d8ff3f"
               font={textStyle}
               transition={transition}
             />
           </div>
 
-          <span className="text-[100px] text-white">
+          <span className="text-[100px] text-[#f9f7f0]">
             :
           </span>
 
@@ -963,7 +963,7 @@ export default function TimerPage() {
           <div className="flex">
             <TextMorph
               words={formatTime(secs)[0]}
-              color="#ffffff"
+              color="#d8ff3f"
               font={textStyle}
               transition={transition}
             />
@@ -986,12 +986,12 @@ export default function TimerPage() {
               cursor-pointer
               rounded-full
               border
-              border-zinc-700
+              border-[#d8ff3f]/40
               px-6
               py-3
-              text-white
+              text-[#f9f7f0]
               transition
-              hover:bg-gray-900
+              hover:bg-[#33332d]
             "
           >
             {state === "paused" ? "Resume" : "Pause"}
@@ -1003,12 +1003,12 @@ export default function TimerPage() {
               cursor-pointer
               rounded-full
               border
-              border-zinc-700
+              border-[#f4f1ea]/25
               px-6
               py-3
-              text-white
+              text-[#f9f7f0]
               transition
-              hover:bg-gray-900
+              hover:bg-[#33332d]
             "
           >
             Reset

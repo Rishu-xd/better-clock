@@ -37,12 +37,28 @@ export default function Dashboard({ userEmail, sessions }: Props) {
   const [filter, setFilter] = useState<Filter>("all");
   const [search, setSearch] = useState("");
   const [profileOpen, setProfileOpen] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
 
   useEffect(() => {
     const start = window.setTimeout(() => setNow(Date.now()), 0);
     const interval = window.setInterval(() => setNow(Date.now()), 1000);
     return () => { window.clearTimeout(start); window.clearInterval(interval); };
   }, []);
+
+  useEffect(() => {
+    const loadTheme = window.setTimeout(() => {
+      setDarkMode(window.localStorage.getItem("betterclock-theme") === "dark");
+    }, 0);
+    return () => window.clearTimeout(loadTheme);
+  }, []);
+
+  const toggleTheme = () => {
+    setDarkMode((current) => {
+      const next = !current;
+      window.localStorage.setItem("betterclock-theme", next ? "dark" : "light");
+      return next;
+    });
+  };
 
   const shown = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -55,15 +71,16 @@ export default function Dashboard({ userEmail, sessions }: Props) {
   const initial = userEmail.trim().at(0)?.toUpperCase() || "U";
 
   return (
-    <main className="min-h-screen text-white" style={{ backgroundImage: "radial-gradient(circle at 82% 94%, rgba(255,224,161,.65), transparent 20%), radial-gradient(circle at 14% 84%, rgba(255,255,255,.48), transparent 25%), linear-gradient(135deg, #b8ccca, #91aaa9 52%, #aec5c2)" }}>
+    <main className={`dashboard-shell min-h-screen ${darkMode ? "dashboard-dark" : "dashboard-light"}`} style={{ backgroundImage: darkMode ? "radial-gradient(circle at 88% 8%, rgba(216,255,63,.18), transparent 20%), radial-gradient(circle at 5% 92%, rgba(86,106,69,.22), transparent 24%), linear-gradient(135deg, #171714, #25251f 55%, #11110f)" : "radial-gradient(circle at 88% 8%, rgba(216,255,63,.48), transparent 19%), radial-gradient(circle at 5% 92%, rgba(255,185,129,.24), transparent 21%), linear-gradient(135deg, #f4f1ea, #e6e1d5 55%, #d9d3c4)" }}>
       <section className="relative min-h-screen overflow-hidden px-4 py-5 sm:px-8 sm:py-7 lg:px-12">
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-amber-100/45 to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-[#d8ff3f]/20 to-transparent" />
         <header className="relative z-10 flex items-center gap-3">
-          <button onClick={() => setFilter("all")} className="cursor-pointer text-lg font-semibold tracking-[-.06em] text-black transition hover:opacity-70 sm:text-xl">better<span className="text-black/35">clock</span></button>
-          <div className="relative ml-auto w-full max-w-sm"><svg viewBox="0 0 24 24" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 stroke-black/45" fill="none" strokeWidth="2"><circle cx="11" cy="11" r="6" /><path d="m16 16 4 4" /></svg><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search tasks" className="h-10 w-full rounded-full border border-black/10 bg-black/15 pl-10 pr-4 text-sm text-black outline-none placeholder:text-black/45 transition focus:border-black/35 focus:bg-white/40" /></div>
-          <button onClick={() => setProfileOpen((open) => !open)} aria-expanded={profileOpen} aria-label="Open profile menu" className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full border border-black/10 bg-white/25 text-sm font-bold text-black transition hover:bg-white/50">{initial}</button>
+          <button onClick={() => setFilter("all")} className={`cursor-pointer text-lg font-semibold tracking-[-.06em] transition hover:opacity-70 sm:text-xl ${darkMode ? "text-[#f9f7f0]" : "text-[#171714]"}`}>better<span className="opacity-35">clock</span></button>
+          <div className="relative ml-auto w-full max-w-sm"><svg viewBox="0 0 24 24" className={`pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 ${darkMode ? "stroke-white/45" : "stroke-[#171714]/45"}`} fill="none" strokeWidth="2"><circle cx="11" cy="11" r="6" /><path d="m16 16 4 4" /></svg><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search tasks" className={`h-10 w-full rounded-full border pl-10 pr-4 text-sm outline-none transition focus:border-[#9dc700] ${darkMode ? "border-white/15 bg-white/10 text-[#f9f7f0] placeholder:text-white/40 focus:bg-white/15" : "border-[#171714]/10 bg-white/55 text-[#171714] placeholder:text-[#171714]/45 focus:bg-white"}`} /></div>
+          <button onClick={toggleTheme} aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"} aria-pressed={darkMode} className={`dashboard-mode-toggle ${darkMode ? "is-dark" : ""}`}><span className="dashboard-mode-knob">{darkMode ? "☾" : "☀"}</span></button>
+          <button onClick={() => setProfileOpen((open) => !open)} aria-expanded={profileOpen} aria-label="Open profile menu" className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full border border-[#171714]/10 bg-[#d8ff3f] text-sm font-bold text-[#171714] transition hover:bg-[#c8ed30]">{initial}</button>
         </header>
-        <div className={`absolute right-5 top-20 z-30 w-64 origin-top-right rounded-2xl border border-white/40 bg-black/85 p-4 shadow-2xl backdrop-blur-xl transition duration-200 ease-out sm:right-8 lg:right-12 ${profileOpen ? "translate-y-0 scale-100 opacity-100" : "pointer-events-none -translate-y-2 scale-95 opacity-0"}`}>
+        <div className={`absolute right-5 top-20 z-30 w-64 origin-top-right rounded-2xl border border-[#d8ff3f]/20 bg-[#20201c] p-4 shadow-2xl backdrop-blur-xl transition duration-200 ease-out sm:right-8 lg:right-12 ${profileOpen ? "translate-y-0 scale-100 opacity-100" : "pointer-events-none -translate-y-2 scale-95 opacity-0"}`}>
           <p className="text-xs uppercase tracking-[.16em] text-zinc-500">Account</p>
           <p className="mt-2 truncate text-sm">{userEmail}</p>
           <button type="button"  onClick={() => router.push("/profile")} className="mt-4 w-full cursor-pointer rounded-xl bg-white px-3 py-2 text-left text-xs font-medium text-black transition hover:bg-zinc-200">View public profile</button>
@@ -71,12 +88,12 @@ export default function Dashboard({ userEmail, sessions }: Props) {
           <button type="button" className="mt-2 w-full cursor-pointer rounded-xl border border-white/10 px-3 py-2 text-left text-xs text-zinc-300 transition hover:bg-white/10">Help center</button>
         </div>
         <div className="relative z-10 mx-auto flex w-full max-w-5xl flex-1 flex-col pt-16 sm:pt-20">
-          <div className="text-center"><h1 className="mt-3 text-xl font-extralight tracking-[-.06em] text-gray-800 sm:text-5xl">Focus workspace</h1></div>
+          <div className="text-center"><h1 className="mt-3 text-xl font-extralight tracking-[-.06em] text-[#171714] sm:text-5xl">Focus workspace</h1></div>
           <div className="mt-9 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {/* <Stat label="All tasks" value={sessions.length} />
             <Stat label="In progress" value={active} /> */}
-            <div className="rounded-2xl border border-black/10 bg-black/[.08] p-3 backdrop-blur-md">
-              <p className="px-1 pb-2 text-[11px] font-medium uppercase tracking-[.16em] text-black/45">
+            <div className="rounded-2xl border border-[#171714]/10 bg-white/50 p-3 backdrop-blur-md">
+              <p className="px-1 pb-2 text-[11px] font-medium uppercase tracking-[.16em] text-[#171714]/45">
                 Start a grind
               </p>
 
@@ -84,7 +101,7 @@ export default function Dashboard({ userEmail, sessions }: Props) {
                 <button
                   type="button"
                   onClick={() => router.push("/timer")}
-                  className="group cursor-pointer rounded-xl border border-black bg-black p-3 text-left text-white transition duration-300 hover:-translate-y-0.5 hover:bg-zinc-900 active:scale-[.98]"
+                  className="group cursor-pointer rounded-xl border border-[#171714] bg-[#171714] p-3 text-left text-[#f9f7f0] transition duration-300 hover:-translate-y-0.5 hover:bg-[#33332d] active:scale-[.98]"
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">Solo</span>
@@ -101,7 +118,7 @@ export default function Dashboard({ userEmail, sessions }: Props) {
                 <button
                   type="button"
                   onClick={() => router.push("/grind")}
-                  className="group cursor-pointer rounded-xl border border-black/10 bg-white/30 p-3 text-left text-black transition duration-300 hover:-translate-y-0.5 hover:bg-white/50 active:scale-[.98]"
+                  className="group cursor-pointer rounded-xl border border-[#171714]/10 bg-[#d8ff3f] p-3 text-left text-[#171714] transition duration-300 hover:-translate-y-0.5 hover:bg-[#c8ed30] active:scale-[.98]"
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">Group</span>
@@ -116,7 +133,7 @@ export default function Dashboard({ userEmail, sessions }: Props) {
                 </button>
               </div>
             </div>
-            <CalendarCard completedDays={25} title={"Monthly progress"} />
+            <CalendarCard completedDays={25} title={"Monthly progress"} darkMode={darkMode} />
 
 
           </div>
@@ -125,17 +142,18 @@ export default function Dashboard({ userEmail, sessions }: Props) {
               totalSeconds={3600}
               soloSeconds={360}
               groupSeconds={0}
-            />
+              darkMode={darkMode}
+            /> 
           </div>
-          <section className="mt-6 rounded-[1.6rem] border border-white/35 bg-black/55 p-4 shadow-[0_18px_50px_rgba(23,38,39,.16)] backdrop-blur-xl sm:p-5">
+          <section className="mt-6 rounded-[1.6rem] border border-[#171714]/20 bg-[#20201c] p-4 shadow-[0_18px_50px_rgba(23,23,20,.2)] backdrop-blur-xl sm:p-5">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3 px-1">
               <div><h2 className="text-sm font-medium">Your tasks</h2><p className="mt-1 text-xs text-zinc-400">{shown.length} {shown.length === 1 ? "task" : "tasks"} shown</p></div>
               <div className="flex flex-wrap items-center gap-2">
                 {nav.map((item) => {
                   const count = item.value === "all" ? sessions.length : item.value === "in_progress" ? active : item.value === "paused" ? paused : completed;
-                  return <button key={item.value} onClick={() => setFilter(item.value)} className={`cursor-pointer rounded-full px-3 py-1.5 text-xs transition ${filter === item.value ? "bg-white text-black" : "border border-white/15 text-zinc-400 hover:border-white/35 hover:text-white"}`}>{item.label}{item.value !== "all" && <span className="ml-1 text-[10px] opacity-70">{count}</span>}</button>;
+                  return <button key={item.value} onClick={() => setFilter(item.value)} className={`cursor-pointer rounded-full px-3 py-1.5 text-xs transition ${filter === item.value ? "bg-[#d8ff3f] text-[#171714]" : "border border-white/15 text-zinc-400 hover:border-[#d8ff3f]/60 hover:text-white"}`}>{item.label}{item.value !== "all" && <span className="ml-1 text-[10px] opacity-70">{count}</span>}</button>;
                 })}
-                <button onClick={() => router.push("/timer")} className="cursor-pointer rounded-full border border-white/15 px-3 py-2 text-xs transition hover:border-white/35 hover:bg-white/10">+ Create task</button>
+                <button onClick={() => router.push("/timer")} className="cursor-pointer rounded-full border border-[#d8ff3f]/40 px-3 py-2 text-xs transition hover:bg-[#d8ff3f] hover:text-[#171714]">+ Create task</button>
               </div>
             </div>
             {shown.length === 0 ? <div className="rounded-2xl border border-dashed border-white/15 px-6 py-12 text-center text-sm text-zinc-300">{search ? "No matching tasks found." : "No tasks in this view yet."}</div> : <div className="space-y-2">{shown.map((session) => <TaskCard key={session.id} session={session} seconds={remaining(session, now)} onPlay={() => router.push(`/timer?session=${session.id}`)} />)}</div>}

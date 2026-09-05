@@ -6,6 +6,7 @@ import ProgressBar from "./ProgressBar";
 type CalendarCardProps = {
   completedDays?: number;
   title?: string;
+  darkMode?: boolean;
 };
 
 const monthName = (month: number, year: number) =>
@@ -17,6 +18,7 @@ const monthName = (month: number, year: number) =>
 export default function CalendarCard({
   completedDays = 0,
   title = "Monthly progress",
+  darkMode = false,
 }: CalendarCardProps) {
   // Realtime current date
   const now = new Date();
@@ -43,26 +45,26 @@ export default function CalendarCard({
       : Math.round((completedCount / daysInMonth) * 100);
 
   return (
-    <section className="w-full max-w-sm  rounded-2xl bg-white/18 backdrop-blur border p-3 overflow-hidden">
+    <section className={`w-full max-w-sm overflow-hidden rounded-2xl border p-3 backdrop-blur transition-colors duration-500 ${darkMode ? "border-white/10 bg-white/[.07] text-[#f9f7f0]" : "border-[#171714]/10 bg-white/45 text-[#171714]"}`}>
 
       {/* Header */}
       <div className="flex items-center justify-between text-sm">
-        <span className="text-gray-800">
+        <span className={darkMode ? "text-[#f9f7f0]" : "text-[#171714]"}>
           {monthName(currentMonth, currentYear)}
         </span>
 
-        <span className={`font-bold ${completion < 80 ? "text-green-800" : "text-red-800"} text-lg`}>
+        <span className="text-lg font-bold text-[#9dc700]">
           {completion}%
         </span>
       </div>
 
       {/* Progress bar */}
       <div className="mt-5">
-        <ProgressBar value={completion} />
+        <ProgressBar value={completion} darkMode={darkMode} />
       </div>
 
       {/* Days */}
-      <div className="mt-2 flex justify-between text-xs text-gray-500">
+      <div className={`mt-2 flex justify-between text-xs ${darkMode ? "text-white/45" : "text-[#171714]/45"}`}>
         <span>{completedCount} completed</span>
 
         <span>{daysInMonth} days</span>
@@ -71,4 +73,3 @@ export default function CalendarCard({
     </section>
   );
 }
-

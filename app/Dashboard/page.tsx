@@ -10,8 +10,8 @@ export default async function DashboardPage() {
 
   if (!user) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-black">
-        <p className="text-neutral-500">
+      <main className="flex min-h-screen items-center justify-center bg-[#f4f1ea]">
+        <p className="text-[#6b6960]">
           You are not logged in.
         </p>
       </main>
