@@ -98,11 +98,7 @@ export default function ProfilePage() {
 
   return (
     <main
-      className="min-h-screen text-black"
-      style={{
-        backgroundImage:
-          "radial-gradient(circle at 82% 94%, rgba(255,224,161,.65), transparent 20%), radial-gradient(circle at 14% 84%, rgba(255,255,255,.48), transparent 25%), linear-gradient(135deg, #b8ccca, #91aaa9 52%, #aec5c2)",
-      }}
+      className="min-h-screen text-black bg-[#f8f4f49e]"
     >
       <section className="relative min-h-screen overflow-hidden px-4 py-5 sm:px-8 sm:py-7 lg:px-12">
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-amber-100/45 to-transparent" />
@@ -156,7 +152,7 @@ export default function ProfilePage() {
                   Your grind
                 </p>
 
-                <p className="mt-3 text-5xl font-medium tracking-[-.07em]">
+                <p className="mt-3 text-5xl font-medium tracking-[-.07em] text-lime-700">
                   {formatHours(totalSeconds)}
                 </p>
 

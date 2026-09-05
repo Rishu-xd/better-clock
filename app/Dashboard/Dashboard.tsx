@@ -141,7 +141,8 @@ export default function Dashboard({ userEmail, sessions }: Props) {
                   </p>
                 </button>
 
-                <button className="group cursor-pointer max-w-96 rounded-xl border border-[#171714]/10 bg-[#d8ff3f] p-3 text-left text-[#171714] transition duration-300 hover:-translate-y-0.5 hover:bg-[#c8ed30] active:scale-[.98] ">Friends</button>
+                  <div style={{width: "223px" , height: "190px"}} className="group cursor-pointer  rounded-xl border border-[#171714]/10 bg-[#171714] p-3 text-left text-[#fcfcf7] transition duration-300 hover:-translate-y-0.5 hover:bg-[#c8ed30] active:scale-[.98] ">
+                  Friends</div>
               </div>
             </div>
             <CalendarCard sessions={sessions} now={now} title={"Monthly progress"} darkMode={darkMode} />
