@@ -83,17 +83,18 @@ export default function Dashboard({ userEmail, sessions }: Props) {
         <div className={`absolute right-5 top-20 z-30 w-64 origin-top-right rounded-2xl border border-[#d8ff3f]/20 bg-[#20201c] p-4 shadow-2xl backdrop-blur-xl transition duration-200 ease-out sm:right-8 lg:right-12 ${profileOpen ? "translate-y-0 scale-100 opacity-100" : "pointer-events-none -translate-y-2 scale-95 opacity-0"}`}>
           <p className="text-xs uppercase tracking-[.16em] text-zinc-500">Account</p>
           <p className="mt-2 truncate text-sm">{userEmail}</p>
-          <button type="button"  onClick={() => router.push("/profile")} className="mt-4 w-full cursor-pointer rounded-xl bg-white px-3 py-2 text-left text-xs font-medium text-black transition hover:bg-zinc-200">View public profile</button>
+          <button type="button" onClick={() => router.push("/profile")} className="mt-4 w-full cursor-pointer rounded-xl bg-white px-3 py-2 text-left text-xs font-medium text-black transition hover:bg-zinc-200">View public profile</button>
 
           <button type="button" className="mt-2 w-full cursor-pointer rounded-xl border border-white/10 px-3 py-2 text-left text-xs text-zinc-300 transition hover:bg-white/10">Help center</button>
         </div>
         <div className="relative z-10 mx-auto flex w-full max-w-5xl flex-1 flex-col pt-16 sm:pt-20">
-          <div className="text-center"><h1 className="mt-3 text-xl font-extralight tracking-[-.06em] text-[#171714] sm:text-5xl">Focus workspace</h1></div>
+          <div className="text-center"><h1 className={`mt-3 text-xl font-extralight tracking-[-.06em] sm:text-5xl ${darkMode ? "text-[#f9f7f0]" : "text-[#171714]"}`}>
+            Focus workspace
+          </h1></div>
           <div className="mt-9 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {/* <Stat label="All tasks" value={sessions.length} />
-            <Stat label="In progress" value={active} /> */}
-            <div className="rounded-2xl border border-[#171714]/10 bg-white/50 p-3 backdrop-blur-md">
-              <p className="px-1 pb-2 text-[11px] font-medium uppercase tracking-[.16em] text-[#171714]/45">
+          
+            <div className={`rounded-2xl border p-3 backdrop-blur-md ${darkMode ? "border-white/10 bg-white/10" : "border-[#171714]/10 bg-white/50"}`}>
+              <p className={`px-1 pb-2 text-[11px] font-medium uppercase tracking-[.16em] ${darkMode ? "text-white/45" : "text-[#171714]/45"}`}>
                 Start a grind
               </p>
 
@@ -110,9 +111,7 @@ export default function Dashboard({ userEmail, sessions }: Props) {
                     </span>
                   </div>
 
-                  <p className="mt-1 text-[11px] text-zinc-400">
-                    Focus on your own
-                  </p>
+                 <p className="mt-1 text-[11px] text-zinc-400">Focus on your own</p>
                 </button>
 
                 <button
@@ -142,8 +141,8 @@ export default function Dashboard({ userEmail, sessions }: Props) {
               totalSeconds={3600}
               soloSeconds={360}
               groupSeconds={0}
-              darkMode={darkMode}
-            /> 
+              theme={darkMode}
+            />
           </div>
           <section className="mt-6 rounded-[1.6rem] border border-[#171714]/20 bg-[#20201c] p-4 shadow-[0_18px_50px_rgba(23,23,20,.2)] backdrop-blur-xl sm:p-5">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3 px-1">
