@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { useParams, useRouter } from "next/navigation";
 
@@ -14,6 +14,7 @@ type Group = {
   name: string;
   created_by: string;
   created_at: string;
+  invite_code: string;
 };
 
 type Member = {
@@ -24,12 +25,9 @@ type Member = {
 export default function GrindRoomPage() {
   const params = useParams<{ groupID: string }>();
   const router = useRouter();
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
 
   const groupID = params.groupID;
-
-  console.log("PARAMS:", params);
-  console.log("GROUP ID:", groupID);
 
   const [group, setGroup] = useState<Group | null>(null);
   const [members, setMembers] = useState<Member[]>([]);
@@ -101,8 +99,32 @@ export default function GrindRoomPage() {
   }, [groupID, router, supabase]);
 
   useEffect(() => {
-    loadRoom();
+    void Promise.resolve().then(loadRoom);
   }, [loadRoom]);
+
+  useEffect(() => {
+    if (!groupID) return;
+
+    const channel = supabase
+      .channel(`grind-members:${groupID}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "grind_group_members",
+          filter: `group_id=eq.${groupID}`,
+        },
+        () => {
+          loadRoom();
+        },
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [groupID, loadRoom, supabase]);
 
   // Close invite modal with Escape
   useEffect(() => {
@@ -123,8 +145,8 @@ export default function GrindRoomPage() {
   }, [inviteOpen]);
 
   const inviteUrl =
-    typeof window !== "undefined"
-      ? `${window.location.origin}/grind/${groupID}`
+    typeof window !== "undefined" && group?.invite_code
+      ? `${window.location.origin}/grind/join/${group.invite_code}`
       : "";
 
   const handleCopyLink = async () => {

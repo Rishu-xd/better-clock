@@ -8,6 +8,14 @@ type CreateGrindProps = {
   onCreated?: (groupId: string) => void;
 };
 
+const INVITE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
+
+function createInviteCode() {
+  const values = crypto.getRandomValues(new Uint32Array(6));
+
+  return Array.from(values, (value) => INVITE_ALPHABET[value % INVITE_ALPHABET.length]).join("");
+}
+
 export default function CreateGrind({ onCreated }: CreateGrindProps) {
   const supabase = createClient();
 
@@ -36,18 +44,33 @@ export default function CreateGrind({ onCreated }: CreateGrindProps) {
         throw new Error("You need to be logged in.");
       }
 
-      // Create the group
-      const { data: group, error: groupError } = await supabase
-        .from("grind_groups")
-        .insert({
-          name: trimmedName,
-          created_by: user.id,
-        })
-        .select()
-        .single();
+      let group: { id: string } | null = null;
 
-      if (groupError) {
-        throw new Error(groupError.message);
+      // The database unique constraint is the source of truth; retry only on a
+      // rare invite-code collision so public URLs never expose the group UUID.
+      for (let attempt = 0; attempt < 5; attempt += 1) {
+        const { data, error: groupError } = await supabase
+          .from("grind_groups")
+          .insert({
+            name: trimmedName,
+            created_by: user.id,
+            invite_code: createInviteCode(),
+          })
+          .select("id")
+          .single();
+
+        if (!groupError && data) {
+          group = data;
+          break;
+        }
+
+        if (groupError?.code !== "23505") {
+          throw new Error(groupError?.message ?? "Unable to create the grind.");
+        }
+      }
+
+      if (!group) {
+        throw new Error("Could not create a unique invite code. Please try again.");
       }
 
       // Automatically add creator as the first member

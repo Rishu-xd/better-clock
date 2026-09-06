@@ -2,13 +2,18 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const supabase = createClient();
+  const requestedNext = searchParams.get("next");
+  const nextPath = requestedNext?.startsWith("/") && !requestedNext.startsWith("//")
+    ? requestedNext
+    : "/Dashboard";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -19,7 +24,7 @@ export default function LoginPage() {
   const { error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: `${window.location.origin}/auth/callback`,
+      redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`,
     },
   });
 
@@ -33,7 +38,7 @@ const handleGitHubLogin = async () => {
   const { error } = await supabase.auth.signInWithOAuth({
     provider: "github",
     options: {
-      redirectTo: `${window.location.origin}/auth/callback`,
+      redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`,
     },
   });
 
@@ -72,7 +77,7 @@ const handleGitHubLogin = async () => {
       return;
     }
 
-    router.push("/Dashboard");
+    router.push(nextPath);
     router.refresh();
   }
 
@@ -267,7 +272,7 @@ const handleGitHubLogin = async () => {
 
           <button
             type="button"
-            onClick={() => router.push("/signup")}
+            onClick={() => router.push(`/signup?next=${encodeURIComponent(nextPath)}`)}
             className="cursor-pointer font-medium text-[#171714] hover:underline"
           >
             Sign up
