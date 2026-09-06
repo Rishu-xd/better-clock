@@ -291,8 +291,23 @@ function TimeColumn({
  * -------------------------------------------------- */
 
 export default function TimerPage() {
-  const groupId = typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("group");
-  return groupId ? <SyncedGrindTimer groupId={groupId} /> : <PersonalTimerPage />;
+  const [groupId, setGroupId] = useState<string | null | undefined>(undefined);
+
+  useEffect(() => {
+    void Promise.resolve().then(() => {
+      setGroupId(new URLSearchParams(window.location.search).get("group"));
+    });
+  }, []);
+
+  if (groupId === undefined) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-[#20201c] text-sm text-[#f9f7f0]/55">
+        Loading your clock...
+      </main>
+    );
+  }
+
+  return groupId ? <SyncedGrindTimer key={groupId} groupId={groupId} /> : <PersonalTimerPage />;
 }
 
 function PersonalTimerPage() {
