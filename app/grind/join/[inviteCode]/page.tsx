@@ -41,7 +41,12 @@ export default function JoinGrindPage() {
         .eq("invite_code", inviteCode)
         .maybeSingle<Group>();
 
-      if (groupError || !group) {
+      if (groupError) {
+        if (active) setError(`Unable to load this invite: ${groupError.message}`);
+        return;
+      }
+
+      if (!group) {
         if (active) setError("This grind invite has expired or is no longer available.");
         return;
       }
