@@ -5,6 +5,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import TextMorph from "@/components/page";
 import VaporizeTextCycle from "@/components/veporizer";
+import GrindPresence from "@/components/grind/GrindPresence";
 import { useTimer } from "react-use-precision-timer";
 
 const DEFAULT_HOURS = 0;
@@ -20,6 +21,8 @@ type TimerState =
   | "running"
   | "paused"
   | "vaporizing";
+
+type TimerMode = "countdown" | "stopwatch";
 
 type SessionState =
   | "in_progress"
@@ -287,6 +290,11 @@ function TimeColumn({
  * -------------------------------------------------- */
 
 export default function TimerPage() {
+  const timerConfig = typeof window === "undefined" ? null : new URLSearchParams(window.location.search);
+  const groupId = timerConfig?.get("group") || null;
+  const initialMode: TimerMode = timerConfig?.get("mode") === "stopwatch" ? "stopwatch" : "countdown";
+  const initialDuration = Number(timerConfig?.get("duration"));
+  const shouldAutoStart = timerConfig?.get("autostart") === "1";
   /* --------------------------------------------------
    * TASK
    * -------------------------------------------------- */
@@ -296,16 +304,17 @@ export default function TimerPage() {
 
   const [sessionId, setSessionId] =
     useState<string | null>(null);
+  const [timerMode, setTimerMode] = useState<TimerMode>(initialMode);
 
   /* --------------------------------------------------
    * SELECTED TIME
    * -------------------------------------------------- */
 
   const [selectedHours, setSelectedHours] =
-    useState(DEFAULT_HOURS);
+    useState(initialMode === "countdown" && Number.isFinite(initialDuration) && initialDuration > 0 ? Math.floor(initialDuration / 3600) : DEFAULT_HOURS);
 
   const [selectedMinutes, setSelectedMinutes] =
-    useState(DEFAULT_MINUTES);
+    useState(initialMode === "countdown" && Number.isFinite(initialDuration) && initialDuration > 0 ? Math.floor(initialDuration / 60) % 60 : DEFAULT_MINUTES);
 
   const [selectedSeconds, setSelectedSeconds] =
     useState(DEFAULT_SECONDS);
@@ -364,6 +373,7 @@ export default function TimerPage() {
 
   const timerRef = useRef<ReturnType<typeof useTimer> | null>(null);
   const loadedSessionRef = useRef(false);
+  const autoStartedRef = useRef(false);
 
   /* --------------------------------------------------
    * PRECISION TIMER
@@ -373,6 +383,10 @@ export default function TimerPage() {
     { delay: 1000 },
     useCallback(() => {
       setSeconds((previousSeconds) => {
+        if (timerMode === "stopwatch") {
+          return previousSeconds + 1;
+        }
+
         if (previousSeconds <= 1) {
           timerRef.current?.stop();
 
@@ -394,7 +408,7 @@ export default function TimerPage() {
 
         return previousSeconds - 1;
       });
-    }, [sessionId, updateSessionState])
+    }, [sessionId, timerMode, updateSessionState])
   );
 
   useEffect(() => {
@@ -548,13 +562,13 @@ export default function TimerPage() {
    * CREATE TASK / SET TIMER
    * -------------------------------------------------- */
 
-  const setTimer = async () => {
+  const setTimer = useCallback(async () => {
     const total =
       selectedHours * 3600 +
       selectedMinutes * 60 +
       selectedSeconds;
 
-    if (total <= 0) return;
+    if (timerMode === "countdown" && total <= 0) return;
 
     const supabase = createClient();
 
@@ -616,7 +630,7 @@ export default function TimerPage() {
         .insert({
           user_id: user.id,
           name: finalName,
-          duration: total,
+          duration: timerMode === "stopwatch" ? 0 : total,
           started_at: startedAt,
           completed_at: null,
           state: "in_progress",
@@ -641,10 +655,17 @@ export default function TimerPage() {
 
     timer.stop();
 
-    setSeconds(total);
+    setSeconds(timerMode === "stopwatch" ? 0 : total);
 
     setState("assembling");
-  };
+  }, [selectedHours, selectedMinutes, selectedSeconds, sessionName, timer, timerMode]);
+
+  useEffect(() => {
+    if (!shouldAutoStart || autoStartedRef.current || state !== "setup") return;
+
+    autoStartedRef.current = true;
+    void Promise.resolve().then(setTimer);
+  }, [setTimer, shouldAutoStart, state]);
 
   /* --------------------------------------------------
    * RESET
@@ -656,7 +677,10 @@ export default function TimerPage() {
     if (sessionId) {
       void updateSessionState(
         "completed",
-        { completedAt: new Date().toISOString() }
+        {
+          completedAt: new Date().toISOString(),
+          duration: timerMode === "stopwatch" ? seconds : undefined,
+        }
       );
     }
 
@@ -679,7 +703,7 @@ export default function TimerPage() {
       timer.stop();
       setState("paused");
       void updateSessionState("paused", {
-        duration: seconds,
+        duration: timerMode === "stopwatch" ? seconds : undefined,
       });
       return;
     }
@@ -699,13 +723,14 @@ export default function TimerPage() {
 
   if (state === "setup") {
     const canStart =
-      selectedHours > 0 ||
+      timerMode === "stopwatch" || selectedHours > 0 ||
       selectedMinutes > 0 ||
       selectedSeconds > 0;
 
     return (
       <div className="relative flex min-h-screen items-center justify-center bg-[#20201c] text-[#f9f7f0]">
         <DashboardLink />
+        <GrindPresence groupId={groupId} />
         <main className="flex w-full flex-col items-center">
 
           {/* TASK NAME */}
@@ -737,6 +762,15 @@ export default function TimerPage() {
             "
           />
 
+          <div className="mb-5 flex rounded-full border border-[#d8ff3f]/25 p-1 text-xs">
+            {(["countdown", "stopwatch"] as const).map((mode) => (
+              <button key={mode} onClick={() => setTimerMode(mode)} className={`rounded-full px-4 py-2 transition ${timerMode === mode ? "bg-[#d8ff3f] text-[#20201c]" : "text-[#f4f1ea]/60"}`}>
+                {mode === "countdown" ? "Timer" : "Stopwatch"}
+              </button>
+            ))}
+          </div>
+
+          {timerMode === "countdown" ? <>
           {/* TIME PICKER */}
 
           <div className="relative">
@@ -763,6 +797,7 @@ export default function TimerPage() {
               "
             />
           </div>
+          </> : <p className="mb-8 text-sm text-[#f4f1ea]/55">Start counting up whenever you&apos;re ready.</p>}
 
           {/* SET TIMER */}
 
@@ -788,7 +823,7 @@ export default function TimerPage() {
               disabled:opacity-30
             "
           >
-            Set Timer
+            Start {timerMode === "countdown" ? "Timer" : "Stopwatch"}
           </button>
         </main>
       </div>
@@ -803,6 +838,7 @@ export default function TimerPage() {
     return (
       <div className="relative flex min-h-screen items-center justify-center bg-[#20201c]">
         <DashboardLink />
+        <GrindPresence groupId={groupId} />
         <div className="h-[140px] w-[700px]">
           <VaporizeTextCycle
             texts={[timerText]}
@@ -853,6 +889,7 @@ export default function TimerPage() {
     return (
       <div className="relative flex min-h-screen items-center justify-center bg-[#20201c]">
         <DashboardLink />
+        <GrindPresence groupId={groupId} />
         <div className="h-[140px] w-[700px]">
           <VaporizeTextCycle
             key="final-vaporize"
@@ -902,6 +939,7 @@ export default function TimerPage() {
   return (
     <div className="relative flex min-h-screen items-center justify-center bg-[#20201c]">
       <DashboardLink />
+      <GrindPresence groupId={groupId} />
       <main className="flex flex-col items-center">
 
         {/* TASK NAME */}

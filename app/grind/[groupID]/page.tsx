@@ -41,6 +41,8 @@ export default function GrindRoomPage() {
   const [inviteOpen, setInviteOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [sharing, setSharing] = useState(false);
+  const [timerMode, setTimerMode] = useState<"countdown" | "stopwatch">("countdown");
+  const [durationMinutes, setDurationMinutes] = useState(25);
 
   const loadRoom = useCallback(async () => {
     setError("");
@@ -486,6 +488,28 @@ export default function GrindRoomPage() {
               "
             />
 
+            <div className="mb-6 flex flex-col gap-3 rounded-2xl border border-black/[0.06] bg-white/30 p-4 dark:border-white/[0.08] dark:bg-white/[0.035] sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-sm font-medium text-black/65 dark:text-white/75">Session setup</p>
+                <p className="mt-0.5 text-xs text-black/35 dark:text-white/35">Choose how this grind begins for you.</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="flex rounded-xl border border-black/[0.06] bg-white/35 p-1 dark:border-white/[0.08] dark:bg-white/[0.04]">
+                  {(["countdown", "stopwatch"] as const).map((mode) => (
+                    <button key={mode} type="button" onClick={() => setTimerMode(mode)} className={`rounded-lg px-3 py-1.5 text-xs font-medium capitalize transition ${timerMode === mode ? "bg-black/[0.85] text-white dark:bg-white/[0.9] dark:text-black" : "text-black/45 dark:text-white/45"}`}>
+                      {mode === "countdown" ? "Timer" : "Stopwatch"}
+                    </button>
+                  ))}
+                </div>
+                {timerMode === "countdown" && (
+                  <label className="flex items-center gap-1.5 text-xs text-black/45 dark:text-white/45">
+                    <input type="number" min="1" max="720" value={durationMinutes} onChange={(event) => setDurationMinutes(Math.max(1, Math.min(720, Number(event.target.value) || 1)))} className="w-14 rounded-lg border border-black/[0.08] bg-white/45 px-2 py-1.5 text-center text-black/70 outline-none dark:border-white/[0.1] dark:bg-white/[0.06] dark:text-white/75" />
+                    min
+                  </label>
+                )}
+              </div>
+            </div>
+
             {/* Room status */}
 
             <div
@@ -756,6 +780,7 @@ export default function GrindRoomPage() {
               <motion.button
                 whileHover={{ y: -1 }}
                 whileTap={{ scale: 0.985 }}
+                onClick={() => router.push(`/timer?group=${encodeURIComponent(groupID)}&mode=${timerMode}&duration=${timerMode === "countdown" ? durationMinutes * 60 : 0}&autostart=1`)}
                 className="
                   h-12
                   flex-1
@@ -772,7 +797,7 @@ export default function GrindRoomPage() {
                   dark:text-black
                 "
               >
-                Start Grind
+                Start {timerMode === "countdown" ? "Timer" : "Stopwatch"}
               </motion.button>
 
               <motion.button
