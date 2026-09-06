@@ -107,8 +107,10 @@ export default function GrindRoomPage() {
   }, [loadRoom]);
 
   useEffect(() => {
-    if (group?.session_state === "running") router.replace(`/timer?group=${encodeURIComponent(group.id)}`);
-  }, [group, router]);
+    if (group?.session_state === "running" && group.created_by === currentUserId) {
+      router.replace(`/timer?group=${encodeURIComponent(group.id)}`);
+    }
+  }, [currentUserId, group, router]);
 
   useEffect(() => {
     if (!groupID) return;
@@ -631,7 +633,7 @@ export default function GrindRoomPage() {
 
                 {/* Invite Friend */}
 
-                <motion.button
+                {group.created_by === currentUserId && <motion.button
                   whileHover={{ y: -1 }}
                   whileTap={{ scale: 0.97 }}
                   onClick={() => {
@@ -664,7 +666,7 @@ export default function GrindRoomPage() {
                 >
                   <span className="text-sm leading-none">+</span>
                   Invite Friend
-                </motion.button>
+                </motion.button>}
               </div>
 
               <div className="space-y-2">
@@ -808,11 +810,11 @@ export default function GrindRoomPage() {
             {/* Actions */}
 
             <div className="flex flex-col gap-2 sm:flex-row">
-              <motion.button
+              {group.created_by === currentUserId ? <motion.button
                 whileHover={{ y: -1 }}
                 whileTap={{ scale: 0.985 }}
                 onClick={() => void handleStartGrind()}
-                disabled={group.created_by !== currentUserId || starting}
+                disabled={starting}
                 className="
                   h-12
                   flex-1
@@ -829,8 +831,9 @@ export default function GrindRoomPage() {
                   dark:text-black
                 "
               >
-                {group.created_by === currentUserId ? (starting ? "Starting..." : `Start ${timerMode === "countdown" ? "Timer" : "Stopwatch"}`) : "Waiting for host"}
+                {starting ? "Starting..." : `Start ${timerMode === "countdown" ? "Timer" : "Stopwatch"}`}
               </motion.button>
+              : <motion.button whileHover={{ y: -1 }} whileTap={{ scale: 0.985 }} onClick={() => router.push("/Dashboard")} className="h-12 flex-1 rounded-2xl border border-black/[0.07] bg-white/35 text-sm font-medium text-black/55 backdrop-blur-xl transition-colors hover:bg-white/60 dark:border-white/[0.09] dark:bg-white/[0.04] dark:text-white/55 dark:hover:bg-white/[0.07]">Open Dashboard</motion.button>}
 
               <motion.button
                 whileHover={{ y: -1 }}
