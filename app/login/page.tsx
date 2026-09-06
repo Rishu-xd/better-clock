@@ -1,12 +1,12 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/client";
 
-export default function LoginPage() {
+function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const supabase = createClient();
@@ -281,6 +281,16 @@ const handleGitHubLogin = async () => {
 
       </div>
     </main>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={<main className="min-h-screen bg-[#f4f1ea]" aria-busy="true" />}
+    >
+      <LoginPageContent />
+    </Suspense>
   );
 }
 
