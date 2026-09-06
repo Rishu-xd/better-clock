@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import TextMorph from "@/components/page";
 import VaporizeTextCycle from "@/components/veporizer";
 import GrindPresence from "@/components/grind/GrindPresence";
+import SyncedGrindTimer from "@/components/grind/SyncedGrindTimer";
 import { useTimer } from "react-use-precision-timer";
 
 const DEFAULT_HOURS = 0;
@@ -290,8 +291,13 @@ function TimeColumn({
  * -------------------------------------------------- */
 
 export default function TimerPage() {
+  const groupId = typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("group");
+  return groupId ? <SyncedGrindTimer groupId={groupId} /> : <PersonalTimerPage />;
+}
+
+function PersonalTimerPage() {
   const timerConfig = typeof window === "undefined" ? null : new URLSearchParams(window.location.search);
-  const groupId = timerConfig?.get("group") || null;
+  const groupId = null;
   const initialMode: TimerMode = timerConfig?.get("mode") === "stopwatch" ? "stopwatch" : "countdown";
   const initialDuration = Number(timerConfig?.get("duration"));
   const shouldAutoStart = timerConfig?.get("autostart") === "1";

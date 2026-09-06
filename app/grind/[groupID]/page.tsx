@@ -15,6 +15,7 @@ type Group = {
   created_by: string;
   created_at: string;
   invite_code: string;
+  session_state?: "idle" | "running" | "paused" | "completed";
 };
 
 type Member = {
@@ -43,6 +44,7 @@ export default function GrindRoomPage() {
   const [sharing, setSharing] = useState(false);
   const [timerMode, setTimerMode] = useState<"countdown" | "stopwatch">("countdown");
   const [durationMinutes, setDurationMinutes] = useState(25);
+  const [starting, setStarting] = useState(false);
 
   const loadRoom = useCallback(async () => {
     setError("");
@@ -105,6 +107,10 @@ export default function GrindRoomPage() {
   }, [loadRoom]);
 
   useEffect(() => {
+    if (group?.session_state === "running") router.replace(`/timer?group=${encodeURIComponent(group.id)}`);
+  }, [group, router]);
+
+  useEffect(() => {
     if (!groupID) return;
 
     const channel = supabase
@@ -126,6 +132,16 @@ export default function GrindRoomPage() {
     return () => {
       supabase.removeChannel(channel);
     };
+  }, [groupID, loadRoom, supabase]);
+
+  useEffect(() => {
+    if (!groupID) return;
+    const channel = supabase
+      .channel(`grind-room:${groupID}`)
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "grind_groups", filter: `id=eq.${groupID}` }, () => void loadRoom())
+      .subscribe();
+
+    return () => { void supabase.removeChannel(channel); };
   }, [groupID, loadRoom, supabase]);
 
   // Close invite modal with Escape
@@ -240,6 +256,21 @@ export default function GrindRoomPage() {
 
       setLeaving(false);
     }
+  };
+
+  const handleStartGrind = async () => {
+    if (!group || currentUserId !== group.created_by) return;
+    setStarting(true);
+    setError("");
+    const { error: startError } = await supabase.from("grind_groups").update({
+      session_mode: timerMode,
+      session_duration: timerMode === "countdown" ? durationMinutes * 60 : 0,
+      session_state: "running",
+      session_started_at: new Date().toISOString(),
+      session_elapsed_seconds: 0,
+    }).eq("id", group.id);
+    if (startError) { setError(startError.message); setStarting(false); return; }
+    router.push(`/timer?group=${encodeURIComponent(group.id)}`);
   };
 
   if (loading) {
@@ -488,7 +519,7 @@ export default function GrindRoomPage() {
               "
             />
 
-            <div className="mb-6 flex flex-col gap-3 rounded-2xl border border-black/[0.06] bg-white/30 p-4 dark:border-white/[0.08] dark:bg-white/[0.035] sm:flex-row sm:items-center sm:justify-between">
+            {group.created_by === currentUserId ? <div className="mb-6 flex flex-col gap-3 rounded-2xl border border-black/[0.06] bg-white/30 p-4 dark:border-white/[0.08] dark:bg-white/[0.035] sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="text-sm font-medium text-black/65 dark:text-white/75">Session setup</p>
                 <p className="mt-0.5 text-xs text-black/35 dark:text-white/35">Choose how this grind begins for you.</p>
@@ -508,7 +539,7 @@ export default function GrindRoomPage() {
                   </label>
                 )}
               </div>
-            </div>
+            </div> : <p className="mb-6 rounded-2xl border border-black/[0.06] bg-white/30 px-4 py-3 text-sm text-black/45 dark:border-white/[0.08] dark:bg-white/[0.035] dark:text-white/45">Waiting for the host to start the shared clock.</p>}
 
             {/* Room status */}
 
@@ -780,7 +811,8 @@ export default function GrindRoomPage() {
               <motion.button
                 whileHover={{ y: -1 }}
                 whileTap={{ scale: 0.985 }}
-                onClick={() => router.push(`/timer?group=${encodeURIComponent(groupID)}&mode=${timerMode}&duration=${timerMode === "countdown" ? durationMinutes * 60 : 0}&autostart=1`)}
+                onClick={() => void handleStartGrind()}
+                disabled={group.created_by !== currentUserId || starting}
                 className="
                   h-12
                   flex-1
@@ -797,7 +829,7 @@ export default function GrindRoomPage() {
                   dark:text-black
                 "
               >
-                Start {timerMode === "countdown" ? "Timer" : "Stopwatch"}
+                {group.created_by === currentUserId ? (starting ? "Starting..." : `Start ${timerMode === "countdown" ? "Timer" : "Stopwatch"}`) : "Waiting for host"}
               </motion.button>
 
               <motion.button
