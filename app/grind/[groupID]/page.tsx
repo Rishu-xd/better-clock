@@ -107,10 +107,10 @@ export default function GrindRoomPage() {
   }, [loadRoom]);
 
   useEffect(() => {
-    if (group?.session_state === "running" && group.created_by === currentUserId) {
+    if (group?.session_state === "running") {
       router.replace(`/timer?group=${encodeURIComponent(group.id)}`);
     }
-  }, [currentUserId, group, router]);
+  }, [group, router]);
 
   useEffect(() => {
     if (!groupID) return;
