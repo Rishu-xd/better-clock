@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -370,6 +371,31 @@ export default function CreateGrind({ onCreated }: CreateGrindProps) {
               )}
             </AnimatePresence>
           </motion.button>
+
+          <Link
+            href="/video-grind"
+            className="
+              mt-3
+              flex
+              h-12
+              w-full
+              items-center
+              justify-center
+              rounded-2xl
+              border
+              border-white/15
+              bg-white/[0.04]
+              text-sm
+              font-medium
+              text-white/75
+              transition
+              hover:border-[#d8ff3f]/50
+              hover:bg-white/[0.08]
+              hover:text-white
+            "
+          >
+            Start a video grind
+          </Link>
         </div>
       </div>
     </motion.div>
