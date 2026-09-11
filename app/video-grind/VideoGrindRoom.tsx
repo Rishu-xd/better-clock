@@ -19,8 +19,8 @@ export default function VideoGrindRoom() {
   const peerRef = useRef<Peer | null>(null);
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const connectionsRef = useRef(new Map<string, MediaConnection>());
+  const joinedAtRef = useRef<number | null>(null);
   const [room, setRoom] = useState<Room | null>(null);
-  const [userId, setUserId] = useState("");
   const participantsRef = useRef<Participant[]>([]);
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [remoteVideos, setRemoteVideos] = useState<RemoteVideo[]>([]);
@@ -73,7 +73,6 @@ export default function VideoGrindRoom() {
         return;
       }
       currentUserId = authData.user.id;
-      setUserId(currentUserId);
 
       const [{ data: roomData, error: roomError }, { data: joinData, error: joinError }] = await Promise.all([
         supabase.from("video_rooms").select("id, host_id, max_participants").eq("id", roomId).maybeSingle<Room>(),
@@ -86,6 +85,7 @@ export default function VideoGrindRoom() {
       }
       if (!active) return;
       setRoom(roomData);
+      joinedAtRef.current = Date.now();
 
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
@@ -169,7 +169,18 @@ export default function VideoGrindRoom() {
   };
   const leaveRoom = async () => {
     setLeaving(true);
-    await supabase.from("video_room_members").delete().eq("room_id", roomId).eq("user_id", userId);
+    const durationSeconds = joinedAtRef.current
+      ? Math.max(0, Math.floor((Date.now() - joinedAtRef.current) / 1000))
+      : 0;
+    const { error: leaveError } = await supabase.rpc("leave_video_room", {
+      room_id_input: roomId,
+      duration_seconds_input: durationSeconds,
+    });
+    if (leaveError) {
+      setError(leaveError.message);
+      setLeaving(false);
+      return;
+    }
     router.push("/video-grind");
   };
 
@@ -192,7 +203,7 @@ export default function VideoGrindRoom() {
         {notice && <div role="status" className="mt-4 rounded-xl border border-[#d8ff3f]/20 bg-[#d8ff3f]/10 px-4 py-3 text-sm text-[#efffb5]">{notice}</div>}
         <section className="mt-5 min-h-0 flex-1">
           <div onScroll={(event) => { const target = event.currentTarget; if (target.scrollTop + target.clientHeight >= target.scrollHeight - 80) setVisibleCount((count) => Math.min(count + 6, remoteVideos.length)); }} className="grid max-h-[calc(100vh-13rem)] min-h-[18rem] grid-cols-1 gap-3 overflow-y-auto pr-1 sm:grid-cols-2 lg:grid-cols-3">
-            <VideoTile label="You" stream={null} videoRef={localVideoRef} muted cameraOff />
+            <VideoTile label="You" stream={null} videoRef={localVideoRef} muted cameraOff={cameraOff} />
             {shownVideos.map((video) => <VideoTile key={video.peerId} label={video.name} stream={video.stream} />)}
             {remoteVideos.length === 0 && <div className="col-span-full flex min-h-48 items-center justify-center rounded-2xl border border-dashed border-white/15 text-sm text-white/45">Your invite is ready. Waiting for people to join.</div>}
           </div>
